@@ -15,7 +15,13 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on:
+      - self-hosted
+      - Windows
+      - X64
+      - leninkart
+      - local
+      - dev
     steps:
       - uses: actions/checkout@v4
 
@@ -26,9 +32,11 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        shell: pwsh
+        run: python -m pip install -r requirements.txt
 
       - name: Execute Jira deployment orchestrator
+        shell: pwsh
         env:
           JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
           JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
@@ -36,12 +44,12 @@ jobs:
           INFRA_PAT: ${{ secrets.INFRA_PAT }}
           ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
           ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
+          ARGOCD_INSECURE: "true"
           DEPLOY_GIT_USER: deployment-poc[bot]
           DEPLOY_GIT_EMAIL: deployment-poc@users.noreply.github.com
-        run: |
-          python -m src.orchestrator \
-            --jira-ticket "${{ inputs.jira_ticket }}" \
-            ${{ inputs.trigger_argocd_sync && '--trigger-argocd-sync' || '' }}
+        run: >
+          python -m src.orchestrator --jira-ticket "${{ inputs.jira_ticket }}"
+          ${{ inputs.trigger_argocd_sync && '--trigger-argocd-sync' || '' }}
 
       - name: Upload deployment artifacts
         if: always()

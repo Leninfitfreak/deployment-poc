@@ -26,6 +26,13 @@ def load_configs(root: Path) -> dict:
     }
 
 
+def env_flag(name: str, default: bool = False) -> bool:
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Jira-driven GitOps deployment POC")
     parser.add_argument("--jira-ticket", required=True)
@@ -51,6 +58,7 @@ def main() -> int:
         argocd = ArgoCdClient(
             os.environ.get("ARGOCD_SERVER"),
             os.environ.get("ARGOCD_AUTH_TOKEN"),
+            insecure=env_flag("ARGOCD_INSECURE"),
         )
 
         with GitOpsRepoManager(
@@ -114,4 +122,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+from urllib.parse import urlparse
 
 import requests
 
@@ -8,12 +9,16 @@ from .utils import PocError
 
 
 class ArgoCdClient:
-    def __init__(self, server: str | None, token: str | None) -> None:
+    def __init__(self, server: str | None, token: str | None, insecure: bool = False) -> None:
         self.server = (server or "").rstrip("/")
         self.token = token
+        self.insecure = insecure
         self.session = requests.Session()
         if token:
             self.session.headers.update({"Authorization": f"Bearer {token}"})
+        if self.server and self._should_disable_tls_verification():
+            self.session.verify = False
+            requests.packages.urllib3.disable_warnings()  # type: ignore[attr-defined]
 
     def configured(self) -> bool:
         return bool(self.server and self.token)
@@ -21,6 +26,12 @@ class ArgoCdClient:
     def _check_ready(self) -> None:
         if not self.configured():
             raise PocError("ArgoCD credentials not configured. Set ARGOCD_SERVER and ARGOCD_AUTH_TOKEN.")
+
+    def _should_disable_tls_verification(self) -> bool:
+        if self.insecure:
+            return True
+        parsed = urlparse(self.server)
+        return parsed.hostname in {"127.0.0.1", "localhost"}
 
     def get_app_status(self, app_name: str) -> dict:
         self._check_ready()
@@ -47,4 +58,3 @@ class ArgoCdClient:
                 return status
             time.sleep(interval_seconds)
         raise PocError(f"Timed out waiting for ArgoCD app '{app_name}' to become Synced and Healthy")
-
