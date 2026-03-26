@@ -66,11 +66,11 @@ def main() -> int:
             target["gitops_branch"],
             os.environ.get("INFRA_PAT", ""),
         ) as gitops:
-            updated_file = gitops.update_image_tag(target["values_path"], metadata["version"])
+            updated_file = gitops.update_image_tag(target["values_path"], target["resolved_version"])
             prechecks = run_prechecks(target, gitops.repo_dir, argocd)
-            gitops.commit_and_push(
+            gitops_commit = gitops.commit_and_push(
                 updated_file,
-                f"deploy({target['app_key']}): jira-{issue.key} -> {metadata['version']}",
+                f"deploy({target['app_key']}): jira-{issue.key} -> {target['resolved_version']}",
                 os.environ.get("DEPLOY_GIT_USER", "deployment-poc[bot]"),
                 os.environ.get("DEPLOY_GIT_EMAIL", "deployment-poc@users.noreply.github.com"),
             )
@@ -82,6 +82,7 @@ def main() -> int:
             argocd_status = argocd.wait_until_synced_and_healthy(
                 target["argocd_app"],
                 timeout_seconds=args.argocd_timeout_seconds,
+                expected_revision=gitops_commit,
             )
 
         postchecks = run_postchecks(target, argocd_status)
@@ -90,6 +91,7 @@ def main() -> int:
             "issue_summary": issue.summary,
             "metadata": metadata,
             "target": target,
+            "gitops_commit": gitops_commit,
             "outcome": "success",
             "prechecks_json": json.dumps(prechecks, indent=2),
             "postchecks_json": json.dumps(postchecks, indent=2),

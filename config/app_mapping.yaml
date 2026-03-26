@@ -4,6 +4,9 @@ apps:
     aliases: [frontend, leninkart-frontend, web]
     values_path_by_env:
       dev: applications/frontend/helm/values-dev.yaml
+    version_aliases_by_env:
+      dev:
+        v1: "23599212196"
     argocd_app_by_env:
       dev: frontend-dev
     namespace_by_env:
@@ -34,4 +37,3 @@ apps:
       dev: dev
     ingress_url_by_env:
       dev: http://dev.leninkart.local/api/orders
-

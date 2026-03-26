@@ -15,6 +15,7 @@ def write_reports(root: Path, result: dict) -> None:
         "",
         f"- Jira ticket: `{result.get('jira_ticket', '')}`",
         f"- Outcome: `{result.get('outcome', '')}`",
+        f"- GitOps commit: `{result.get('gitops_commit', '')}`",
     ]
 
     target = result.get("target", {})
@@ -24,6 +25,8 @@ def write_reports(root: Path, result: dict) -> None:
                 f"- Project: `{target.get('project_key', '')}`",
                 f"- App: `{target.get('app_key', '')}`",
                 f"- Environment: `{target.get('environment', '')}`",
+                f"- Requested version: `{target.get('requested_version', '')}`",
+                f"- Resolved version: `{target.get('resolved_version', '')}`",
                 f"- GitOps repo: `{target.get('gitops_repo', '')}`",
                 f"- GitOps branch: `{target.get('gitops_branch', '')}`",
                 f"- Values path: `{target.get('values_path', '')}`",

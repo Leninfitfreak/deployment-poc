@@ -26,6 +26,7 @@ def validate_target(target: dict) -> None:
     required = [
         "project_key",
         "app_key",
+        "resolved_version",
         "gitops_repo",
         "gitops_branch",
         "values_path",

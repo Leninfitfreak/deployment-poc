@@ -42,9 +42,14 @@ class ArgoCdClient:
         response.raise_for_status()
         payload = response.json()
         status = payload.get("status", {})
+        operation = payload.get("operation", {})
+        operation_state = status.get("operationState", {})
         return {
             "sync": status.get("sync", {}).get("status"),
             "health": status.get("health", {}).get("status"),
+            "revision": status.get("sync", {}).get("revision"),
+            "operation_revision": operation.get("sync", {}).get("revision"),
+            "operation_phase": operation_state.get("phase"),
             "raw": payload,
         }
 
@@ -53,11 +58,23 @@ class ArgoCdClient:
         response = self.session.post(f"{self.server}/api/v1/applications/{app_name}/sync", json={}, timeout=30)
         response.raise_for_status()
 
-    def wait_until_synced_and_healthy(self, app_name: str, timeout_seconds: int = 600, interval_seconds: int = 15) -> dict:
+    def wait_until_synced_and_healthy(
+        self,
+        app_name: str,
+        timeout_seconds: int = 600,
+        interval_seconds: int = 15,
+        expected_revision: str | None = None,
+    ) -> dict:
         deadline = time.time() + timeout_seconds
         while time.time() < deadline:
             status = self.get_app_status(app_name)
-            if status["sync"] == "Synced" and status["health"] == "Healthy":
+            revision_matches = not expected_revision or status["revision"] == expected_revision
+            if status["sync"] == "Synced" and status["health"] == "Healthy" and revision_matches:
                 return status
             time.sleep(interval_seconds)
+        if expected_revision:
+            raise PocError(
+                f"Timed out waiting for ArgoCD app '{app_name}' to reach revision '{expected_revision}' "
+                "with Sync=Synced and Health=Healthy"
+            )
         raise PocError(f"Timed out waiting for ArgoCD app '{app_name}' to become Synced and Healthy")

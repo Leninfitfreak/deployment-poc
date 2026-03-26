@@ -42,6 +42,9 @@ This POC is aligned to the real LeninKart setup discovered from the workspace:
 
 If a Jira ticket omits `url`, the orchestrator falls back to the config-mapped environment URL for the resolved app.
 
+If a Jira ticket uses a release alias instead of a literal image tag, the orchestrator can resolve that alias through
+`config/app_mapping.yaml` for the target app and environment.
+
 ## Reusability
 
 To adapt this POC to another project, update only:

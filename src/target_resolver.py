@@ -12,12 +12,16 @@ def resolve_target(metadata: dict[str, str], projects: dict, app_mapping: dict, 
     app_cfg = app_mapping["apps"][app_key]
     project_key = app_cfg["project"]
     project_cfg = projects["projects"][project_key]
+    requested_version = metadata["version"]
+    resolved_version = _resolve_version(requested_version, app_cfg, env)
 
     return {
         "project_key": project_key,
         "app_key": app_key,
         "environment": env,
-        "version": metadata["version"],
+        "requested_version": requested_version,
+        "resolved_version": resolved_version,
+        "version": resolved_version,
         "url": metadata.get("url") or app_cfg["ingress_url_by_env"][env],
         "gitops_repo": project_cfg["gitops_repo"],
         "gitops_branch": project_cfg["branch_by_env"][env],
@@ -52,3 +56,8 @@ def _resolve_app_key(requested: str, component: str, projects: dict, app_mapping
     if not default_app:
         raise PocError(f"No default deployable app configured for project '{requested}' in env '{env}'")
     return default_app
+
+
+def _resolve_version(requested_version: str, app_cfg: dict, env: str) -> str:
+    aliases = app_cfg.get("version_aliases_by_env", {}).get(env, {})
+    return str(aliases.get(requested_version, requested_version))

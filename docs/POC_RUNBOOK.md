@@ -22,6 +22,11 @@ url: http://dev.leninkart.local/api/products
 
 `component` is optional in the parser, but it is recommended for LeninKart because the live platform deploys per service.
 
+`version` can be either:
+
+- a literal deployable image tag
+- a Jira-friendly release alias that is resolved through `config/app_mapping.yaml`
+
 ## Required GitHub Secrets
 
 - `JIRA_BASE_URL`

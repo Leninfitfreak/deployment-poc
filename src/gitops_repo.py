@@ -32,16 +32,17 @@ class GitOpsRepoManager:
         write_yaml(file_path, payload)
         return file_path
 
-    def commit_and_push(self, file_path: Path, commit_message: str, git_name: str, git_email: str) -> None:
+    def commit_and_push(self, file_path: Path, commit_message: str, git_name: str, git_email: str) -> str:
         run(["git", "config", "user.name", git_name], cwd=self.repo_dir)
         run(["git", "config", "user.email", git_email], cwd=self.repo_dir)
         run(["git", "add", str(file_path.relative_to(self.repo_dir))], cwd=self.repo_dir)
         try:
             run(["git", "commit", "-m", commit_message], cwd=self.repo_dir)
         except Exception:
-            return
+            return run(["git", "rev-parse", "HEAD"], cwd=self.repo_dir).stdout.strip()
         run(["git", "pull", "--rebase", "origin", self.branch], cwd=self.repo_dir)
         run(["git", "push", "origin", self.branch], cwd=self.repo_dir)
+        return run(["git", "rev-parse", "HEAD"], cwd=self.repo_dir).stdout.strip()
 
     def cleanup(self) -> None:
         shutil.rmtree(self.work_dir, ignore_errors=True)
@@ -52,4 +53,3 @@ class GitOpsRepoManager:
 
     def __exit__(self, exc_type, exc, tb) -> None:
         self.cleanup()
-
