@@ -39,10 +39,10 @@ class GitOpsRepoManager:
         try:
             run(["git", "commit", "-m", commit_message], cwd=self.repo_dir)
         except Exception:
-            return run(["git", "rev-parse", "HEAD"], cwd=self.repo_dir).stdout.strip()
+            return run(["git", "rev-parse", "HEAD"], cwd=self.repo_dir)
         run(["git", "pull", "--rebase", "origin", self.branch], cwd=self.repo_dir)
         run(["git", "push", "origin", self.branch], cwd=self.repo_dir)
-        return run(["git", "rev-parse", "HEAD"], cwd=self.repo_dir).stdout.strip()
+        return run(["git", "rev-parse", "HEAD"], cwd=self.repo_dir)
 
     def cleanup(self) -> None:
         shutil.rmtree(self.work_dir, ignore_errors=True)
