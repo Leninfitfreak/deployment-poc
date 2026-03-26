@@ -49,10 +49,23 @@ If a Jira ticket uses a release alias instead of a literal image tag, the orches
 
 To adapt this POC to another project, update only:
 
+- `config/global.yaml`
 - `config/projects.yaml`
 - `config/app_mapping.yaml`
 - `config/environments.yaml`
 - `config/jira_field_mapping.yaml`
+
+## Safe Test Mode
+
+Set `TEST_MODE=true` or pass `--test-mode` to simulate the deployment flow without pushing to the GitOps repo.
+
+In test mode the orchestrator:
+
+- parses and validates the Jira ticket
+- resolves the deployment target
+- updates the GitOps file only in the temporary clone
+- skips the real push
+- returns a simulated successful ArgoCD status for reporting
 
 ## Runtime Note
 

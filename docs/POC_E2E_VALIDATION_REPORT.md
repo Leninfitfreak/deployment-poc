@@ -1,11 +1,12 @@
 # POC E2E Validation Report
 
-## Summary
+## Latest Validated Run
 
-- Jira ticket: `SCRUM-5`
+- Jira ticket: `SCRUM-6`
+- Jira project: `SCRUM`
 - Workflow: `.github/workflows/deploy-from-jira.yml`
-- Workflow run: `#12`
-- Run URL: `https://github.com/Leninfitfreak/deployment-poc/actions/runs/23610565178`
+- Workflow run: `#13`
+- Run URL: `https://github.com/Leninfitfreak/deployment-poc/actions/runs/23611209271`
 - Runner: `leninkart-runner`
 - Runner labels:
   - `self-hosted`
@@ -16,12 +17,14 @@
   - `dev`
 - Final verdict: `SUCCESS`
 
-## Parsed Jira Metadata
+## Jira Metadata
 
-- `app`: `leninkart`
-- `env`: `dev`
-- `version`: `v1`
-- `url`: omitted in Jira description
+```text
+app: leninkart
+component: frontend
+env: dev
+version: v2
+```
 
 ## Resolved Target
 
@@ -31,79 +34,95 @@
 - Namespace: `dev`
 - GitOps repo: `https://github.com/Leninfitfreak/leninkart-infra.git`
 - GitOps branch: `dev`
-- GitOps values file: `applications/frontend/helm/values-dev.yaml`
+- Changed file: `applications/frontend/helm/values-dev.yaml`
 - ArgoCD application: `frontend-dev`
+- Requested version: `v2`
+- Resolved deployable version: `23599512080`
 - Resolved URL: `http://dev.leninkart.local`
-- Requested version: `v1`
-- Resolved deployable version: `23599212196`
 
-## GitOps Update
+## GitOps Result
 
-- Commit pushed to `leninkart-infra/dev`: `8ee5622b87162ef17d202161fd9239f35ece06cd`
-- Commit message: `deploy(frontend): jira-SCRUM-5 -> 23599212196`
-- Updated file: `applications/frontend/helm/values-dev.yaml`
-- Final image tag in GitOps source: `23599212196`
+- Commit pushed to `leninkart-infra/dev`: `a5530ce5dccff30803b262516d8e66edc0022040`
+- Commit message: `deploy(frontend): jira-SCRUM-6 -> 23599512080`
+- Final GitOps image tag: `23599512080`
 
-## ArgoCD Validation
+## ArgoCD Result
 
-- Application: `frontend-dev`
 - Final sync status: `Synced`
 - Final health status: `Healthy`
-- Final synced revision: `8ee5622b87162ef17d202161fd9239f35ece06cd`
-- Final deployed image: `leninfitfreak/frontend:23599212196`
+- Final synced revision: `a5530ce5dccff30803b262516d8e66edc0022040`
+- Final deployed image: `leninfitfreak/frontend:23599512080`
 
-Live verification after workflow completion:
+Live verification:
 
 ```text
 kubectl get application frontend-dev -n argocd -o jsonpath='{.status.sync.status} {.status.health.status} {.status.sync.revision} {.status.operationState.phase}'
-Synced Healthy 8ee5622b87162ef17d202161fd9239f35ece06cd Succeeded
+Synced Healthy a5530ce5dccff30803b262516d8e66edc0022040 Succeeded
 ```
 
 ```text
 kubectl get deploy,pods -n dev -l app=frontend -o wide
-deployment.apps/frontend   1/1   1   1   ...   leninfitfreak/frontend:23599212196
-pod/frontend-84874c9465-cn44t   1/1   Running   ...
+deployment.apps/frontend   1/1   1   1   ...   leninfitfreak/frontend:23599512080
+pod/frontend-5778479f6d-ht4ck   1/1   Running   ...
 ```
 
-## Post-Checks
+## URL Post-Check
 
-- ArgoCD revision/health check: `PASS`
-- Local ingress smoke check using workflow URL directly: `WARN`
-  - workflow artifact reported runner-side DNS resolution failure for `dev.leninkart.local`
-- Local equivalent smoke check using localhost plus host header: `PASS`
-  - `GET http://127.0.0.1/` with `Host: dev.leninkart.local` returned `200`
+- Direct URL check to `http://dev.leninkart.local`: `WARNING`
+  - runner DNS could not resolve `dev.leninkart.local`
+- Local fallback check: `PASS`
+  - request: `GET http://127.0.0.1/`
+  - header: `Host: dev.leninkart.local`
+  - status: `200`
 
-## Real Blockers Found During Validation
+This warning does not invalidate the deployment because the application, service, and ingress-backed localhost route
+were all reachable from the runner machine.
 
-The final successful run came after fixing two real issues:
+## Hardening Added
 
-1. The original `SCRUM-5` value `version: v1` was not a real frontend image tag.
-   - The first deployment attempt pushed `leninfitfreak/frontend:v1`
-   - The pod entered `ImagePullBackOff`
-   - Resolution:
-     - restored the dev frontend to a valid image tag in `leninkart-infra`
-     - added config-driven version alias resolution in `deployment-poc`
-     - mapped `frontend.dev.v1 -> 23599212196`
+The latest validation includes the following hardening improvements:
 
-2. The workflow initially reported success before ArgoCD had proven the new revision was healthy.
-   - Resolution:
-     - updated `deployment-poc` to wait for the exact pushed GitOps revision
-     - success is now tied to `Sync=Synced`, `Health=Healthy`, and the expected revision
+1. Exact ArgoCD revision verification
+   - success now requires:
+     - `status.sync.status == Synced`
+     - `status.health.status == Healthy`
+     - `status.sync.revision == pushed GitOps commit SHA`
 
-## Reusability Check
+2. Duplicate deployment prevention
+   - the orchestrator blocks redeploying the same resolved version unless duplicate deployments are explicitly allowed
 
-The final POC remains reusable because:
+3. Config-driven version resolution
+   - Jira-friendly versions such as `v1` and `v2` resolve through `config/app_mapping.yaml`
 
-- Jira parsing rules stay in `config/jira_field_mapping.yaml`
-- project/app/environment mappings stay in:
+4. Environment restriction
+   - current deployment-poc instance allows only `dev` through `config/global.yaml`
+
+5. Safe test mode
+   - `TEST_MODE=true` simulates the GitOps and ArgoCD result without pushing
+
+6. Local DNS fallback handling
+   - local `.local` hostname failures degrade to `WARNING`, then retry via localhost with the correct host header
+
+## Additional Validation Evidence
+
+- Ticket creation workflow:
+  - `.github/workflows/create-jira-test-ticket.yml`
+  - created `SCRUM-6` successfully on the self-hosted runner
+- Previous successful baseline:
+  - `SCRUM-5`
+  - proved the original working Jira -> GitHub Actions -> GitOps -> ArgoCD path
+
+## Reusability Status
+
+The POC remains reusable because:
+
+- runner labels are centralized in workflow config
+- project and environment scope are driven by:
+  - `config/global.yaml`
   - `config/projects.yaml`
   - `config/app_mapping.yaml`
   - `config/environments.yaml`
+  - `config/jira_field_mapping.yaml`
 - secrets remain externalized in GitHub repository secrets
-- the workflow is tied to the current self-hosted runner labels, not a machine-specific path in business logic
-- release alias resolution is config-driven, not hardcoded inside orchestration logic
-
-## Final Outcome
-
-The full Jira -> GitHub Actions -> self-hosted runner -> GitOps -> ArgoCD path has been executed successfully against
-the live LeninKart dev environment using `SCRUM-5`.
+- no direct cluster mutation is used for deployments
+- the orchestration logic remains separate from `project-validation`

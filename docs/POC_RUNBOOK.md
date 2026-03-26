@@ -10,6 +10,11 @@ Example:
 SCRUM-5
 ```
 
+For repeated validation of the hardened flow, a second ticket can be created through the self-hosted GitHub Actions
+workflow:
+
+- `.github/workflows/create-jira-test-ticket.yml`
+
 ## Expected Jira Description Format
 
 ```text
@@ -35,6 +40,16 @@ url: http://dev.leninkart.local/api/products
 - `INFRA_PAT`
 - `ARGOCD_SERVER` optional if ArgoCD verification is enabled
 - `ARGOCD_AUTH_TOKEN` optional if ArgoCD verification is enabled
+
+## Config Files
+
+- `config/global.yaml`
+- `config/projects.yaml`
+- `config/app_mapping.yaml`
+- `config/environments.yaml`
+- `config/jira_field_mapping.yaml`
+
+These files are the only supported place for project, environment, runner, repo, and version alias changes.
 
 ## Self-Hosted Runner Expectations
 
@@ -98,6 +113,13 @@ The token must never be committed to Git or embedded in repo config.
 ## Local CLI
 
 ```powershell
+python -m src.orchestrator --jira-ticket SCRUM-5
+```
+
+Safe simulation:
+
+```powershell
+$env:TEST_MODE="true"
 python -m src.orchestrator --jira-ticket SCRUM-5
 ```
 
