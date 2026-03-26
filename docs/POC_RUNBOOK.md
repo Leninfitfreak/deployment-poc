@@ -36,6 +36,22 @@ url: http://dev.leninkart.local/api/products
 - `ARGOCD_SERVER` optional if ArgoCD verification is enabled
 - `ARGOCD_AUTH_TOKEN` optional if ArgoCD verification is enabled
 
+## Self-Hosted Runner Expectations
+
+The production-style LeninKart POC is designed to run on the existing local self-hosted runner:
+
+- name: `leninkart-runner`
+- labels:
+  - `self-hosted`
+  - `Windows`
+  - `X64`
+  - `leninkart`
+  - `local`
+  - `dev`
+
+Because ArgoCD runs inside the local k3d cluster, the workflow must run on this self-hosted runner instead of a
+GitHub-hosted runner.
+
 ## ArgoCD Automation Setup
 
 The `github-actions` ArgoCD automation account is created through GitOps in `leninkart-infra`, not through a manual cluster edit.
@@ -84,3 +100,9 @@ The token must never be committed to Git or embedded in repo config.
 ```powershell
 python -m src.orchestrator --jira-ticket SCRUM-5
 ```
+
+## Local Smoke Check Note
+
+If the Jira or config URL uses a local hostname such as `dev.leninkart.local`, direct DNS resolution may depend on the
+machine hosts-file setup. The LeninKart ingress is still reachable locally through `127.0.0.1` with the original host
+header when a runner-side smoke check is needed.
