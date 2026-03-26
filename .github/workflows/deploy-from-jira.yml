@@ -25,11 +25,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-          cache: pip
+      - name: Verify local runner toolchain
+        shell: pwsh
+        run: |
+          python --version
+          git --version
+          kubectl version --client
+          argocd version --client
 
       - name: Install dependencies
         shell: pwsh
