@@ -22,6 +22,13 @@ class GitOpsRepoManager:
         run(["git", "clone", "--branch", self.branch, authed_url, str(self.repo_dir)])
         return self.repo_dir
 
+    def get_current_image_tag(self, values_path: str) -> str:
+        file_path = self.repo_dir / values_path
+        if not file_path.exists():
+            raise PocError(f"Values file not found: {file_path}")
+        payload = read_yaml(file_path)
+        return str(payload.get("image", {}).get("tag", "")).strip()
+
     def update_image_tag(self, values_path: str, new_tag: str) -> Path:
         file_path = self.repo_dir / values_path
         if not file_path.exists():
@@ -32,7 +39,14 @@ class GitOpsRepoManager:
         write_yaml(file_path, payload)
         return file_path
 
-    def commit_and_push(self, file_path: Path, commit_message: str, git_name: str, git_email: str) -> str:
+    def commit_and_push(
+        self,
+        file_path: Path,
+        commit_message: str,
+        git_name: str,
+        git_email: str,
+        test_mode: bool = False,
+    ) -> str:
         run(["git", "config", "user.name", git_name], cwd=self.repo_dir)
         run(["git", "config", "user.email", git_email], cwd=self.repo_dir)
         run(["git", "add", str(file_path.relative_to(self.repo_dir))], cwd=self.repo_dir)
@@ -40,6 +54,8 @@ class GitOpsRepoManager:
             run(["git", "commit", "-m", commit_message], cwd=self.repo_dir)
         except Exception:
             return run(["git", "rev-parse", "HEAD"], cwd=self.repo_dir)
+        if test_mode:
+            return f"test-mode-{run(['git', 'rev-parse', '--short', 'HEAD'], cwd=self.repo_dir)}"
         run(["git", "pull", "--rebase", "origin", self.branch], cwd=self.repo_dir)
         run(["git", "push", "origin", self.branch], cwd=self.repo_dir)
         return run(["git", "rev-parse", "HEAD"], cwd=self.repo_dir)

@@ -1,0 +1,11 @@
+active_project_key: leninkart
+default_environment: dev
+allowed_environments:
+  - dev
+default_runner_labels:
+  - self-hosted
+  - Windows
+  - X64
+  - leninkart
+  - local
+  - dev

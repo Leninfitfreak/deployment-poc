@@ -7,6 +7,7 @@ apps:
     version_aliases_by_env:
       dev:
         v1: "23599212196"
+        v2: "23599512080"
     argocd_app_by_env:
       dev: frontend-dev
     namespace_by_env:

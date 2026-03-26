@@ -13,4 +13,4 @@ description_fields:
     required: true
   url:
     aliases: [url, endpoint]
-    required: true
+    required: false

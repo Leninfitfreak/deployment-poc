@@ -1,0 +1,56 @@
+name: Create Jira Test Ticket
+
+on:
+  workflow_dispatch:
+    inputs:
+      project_key:
+        description: Jira project key
+        required: true
+        default: SCRUM
+        type: string
+      summary:
+        description: Jira summary
+        required: true
+        default: Deploy LeninKart Dev
+        type: string
+      description:
+        description: Multiline Jira description
+        required: true
+        default: "app: leninkart\\ncomponent: frontend\\nenv: dev\\nversion: v2"
+        type: string
+
+jobs:
+  create:
+    runs-on:
+      - self-hosted
+      - Windows
+      - X64
+      - leninkart
+      - local
+      - dev
+    env:
+      RUNNER_PYTHON_DIR: C:\actions-runner\tools\python313
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure self-hosted Python path
+        shell: cmd
+        run: |
+          if not exist "%RUNNER_PYTHON_DIR%\python.exe" (
+            echo Python not found at %RUNNER_PYTHON_DIR%\python.exe
+            exit /b 1
+          )
+          echo %RUNNER_PYTHON_DIR%>> "%GITHUB_PATH%"
+
+      - name: Install dependencies
+        shell: cmd
+        run: python -m pip install -r requirements.txt
+
+      - name: Create Jira ticket
+        shell: cmd
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          JIRA_TICKET_DESCRIPTION: ${{ inputs.description }}
+        run: python -m src.create_test_ticket --project-key "${{ inputs.project_key }}" --summary "${{ inputs.summary }}"

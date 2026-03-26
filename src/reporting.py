@@ -16,6 +16,8 @@ def write_reports(root: Path, result: dict) -> None:
         f"- Jira ticket: `{result.get('jira_ticket', '')}`",
         f"- Outcome: `{result.get('outcome', '')}`",
         f"- GitOps commit: `{result.get('gitops_commit', '')}`",
+        f"- Changed file: `{result.get('changed_file', '')}`",
+        f"- Runner: `{result.get('runner_name', '')}`",
     ]
 
     target = result.get("target", {})

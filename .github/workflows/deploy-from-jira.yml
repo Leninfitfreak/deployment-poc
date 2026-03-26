@@ -12,6 +12,11 @@ on:
         required: false
         default: false
         type: boolean
+      test_mode:
+        description: Simulate GitOps and ArgoCD without pushing changes
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   deploy:
@@ -73,7 +78,20 @@ jobs:
           ARGOCD_INSECURE: "true"
           DEPLOY_GIT_USER: deployment-poc[bot]
           DEPLOY_GIT_EMAIL: deployment-poc@users.noreply.github.com
-        run: python -m src.orchestrator --jira-ticket "${{ inputs.jira_ticket }}" ${{ inputs.trigger_argocd_sync && '--trigger-argocd-sync' || '' }}
+          RUNNER_NAME: ${{ runner.name }}
+          TEST_MODE: ${{ inputs.test_mode }}
+        run: python -m src.orchestrator --jira-ticket "${{ inputs.jira_ticket }}" ${{ inputs.trigger_argocd_sync && '--trigger-argocd-sync' || '' }} ${{ inputs.test_mode && '--test-mode' || '' }}
+
+      - name: Print resolved deployment result
+        if: always()
+        shell: cmd
+        run: |
+          if exist artifacts\deployment-result.json (
+            python -c "import json, pathlib; data=json.loads(pathlib.Path('artifacts/deployment-result.json').read_text()); print('jira_ticket=', data.get('jira_ticket')); print('runner_name=', data.get('runner_name')); print('target_app=', data.get('target', {}).get('app_key')); print('target_env=', data.get('target', {}).get('environment')); print('resolved_version=', data.get('target', {}).get('resolved_version')); print('gitops_commit=', data.get('gitops_commit')); print('argocd_app=', data.get('target', {}).get('argocd_app')); print('outcome=', data.get('outcome'))"
+          ) else (
+            echo deployment-result.json not found
+            exit /b 1
+          )
 
       - name: Upload deployment artifacts
         if: always()
