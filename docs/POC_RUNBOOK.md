@@ -48,8 +48,25 @@ url: http://dev.leninkart.local/api/products
 - `config/app_mapping.yaml`
 - `config/environments.yaml`
 - `config/jira_field_mapping.yaml`
+- `config/deployment_policy.yaml`
+- `config/deployment_state.yaml`
+- `config/deploy_locks.yaml`
 
 These files are the only supported place for project, environment, runner, repo, and version alias changes.
+
+## Locking And State
+
+The hardened orchestrator writes:
+
+- successful deployment state to `config/deployment_state.yaml`
+- logical deployment locks to `config/deploy_locks.yaml`
+
+Those files are Git-tracked and updated by the workflow itself.
+
+If a deployment is already in progress for the same app/environment, the next run fails clearly instead of racing.
+
+If a run is repeated after success, the orchestrator uses the saved state plus live ArgoCD verification to skip or
+reconcile safely.
 
 ## Self-Hosted Runner Expectations
 
@@ -122,6 +139,17 @@ Safe simulation:
 $env:TEST_MODE="true"
 python -m src.orchestrator --jira-ticket SCRUM-5
 ```
+
+## Rollback
+
+Rollback support is intentionally conservative.
+
+Use the previous successful deployment metadata in `config/deployment_state.yaml` to restore the prior version through a
+normal GitOps commit in `leninkart-infra`.
+
+Reference:
+
+- `docs/DEPLOYMENT_STATE_AND_ROLLBACK.md`
 
 ## Local Smoke Check Note
 

@@ -54,6 +54,17 @@ To adapt this POC to another project, update only:
 - `config/app_mapping.yaml`
 - `config/environments.yaml`
 - `config/jira_field_mapping.yaml`
+- `config/deployment_policy.yaml`
+
+## Deployment Safety Layer
+
+The POC now includes a minimal production-style safety layer:
+
+- Git-tracked deployment state in `config/deployment_state.yaml`
+- Git-tracked deployment locks in `config/deploy_locks.yaml`
+- duplicate deployment prevention
+- retry-safe reconciliation handling
+- rollback-ready state history
 
 ## Safe Test Mode
 

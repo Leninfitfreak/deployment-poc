@@ -29,6 +29,9 @@ class GitOpsRepoManager:
         payload = read_yaml(file_path)
         return str(payload.get("image", {}).get("tag", "")).strip()
 
+    def get_current_revision(self) -> str:
+        return run(["git", "rev-parse", "HEAD"], cwd=self.repo_dir)
+
     def update_image_tag(self, values_path: str, new_tag: str) -> Path:
         file_path = self.repo_dir / values_path
         if not file_path.exists():

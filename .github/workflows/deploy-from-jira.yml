@@ -18,6 +18,9 @@ on:
         default: false
         type: boolean
 
+permissions:
+  contents: write
+
 jobs:
   deploy:
     runs-on:
@@ -87,7 +90,7 @@ jobs:
         shell: cmd
         run: |
           if exist artifacts\deployment-result.json (
-            python -c "import json, pathlib; data=json.loads(pathlib.Path('artifacts/deployment-result.json').read_text()); print('jira_ticket=', data.get('jira_ticket')); print('runner_name=', data.get('runner_name')); print('target_app=', data.get('target', {}).get('app_key')); print('target_env=', data.get('target', {}).get('environment')); print('resolved_version=', data.get('target', {}).get('resolved_version')); print('gitops_commit=', data.get('gitops_commit')); print('argocd_app=', data.get('target', {}).get('argocd_app')); print('outcome=', data.get('outcome'))"
+            python -c "import json, pathlib; data=json.loads(pathlib.Path('artifacts/deployment-result.json').read_text()); print('jira_ticket=', data.get('jira_ticket')); print('runner_name=', data.get('runner_name')); print('target_app=', data.get('target', {}).get('app_key')); print('target_env=', data.get('target', {}).get('environment')); print('resolved_version=', data.get('target', {}).get('resolved_version')); print('gitops_commit=', data.get('gitops_commit')); print('argocd_app=', data.get('target', {}).get('argocd_app')); print('deployment_action=', data.get('deployment_action')); print('outcome=', data.get('outcome')); print('lock=', data.get('lock_json')); print('state=', data.get('state_json')); print('postchecks=', data.get('postchecks_json'))"
           ) else (
             echo deployment-result.json not found
             exit /b 1

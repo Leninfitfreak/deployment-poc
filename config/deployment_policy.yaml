@@ -1,0 +1,5 @@
+policy:
+  lock_timeout_minutes: 30
+  auto_rollback_enabled: false
+  allow_duplicate_deployments: false
+  url_fallback_warning_enabled: true
