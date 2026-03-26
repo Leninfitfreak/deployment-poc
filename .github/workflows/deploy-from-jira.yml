@@ -23,8 +23,9 @@ jobs:
       - local
       - dev
     env:
-      RUNNER_PYTHON_DIR: C:\Users\hp\AppData\Local\Programs\Python\Python313
-      RUNNER_ARGOCD_DIR: C:\Users\hp\AppData\Local\Microsoft\WinGet\Packages\argoproj.argocd_Microsoft.Winget.Source_8wekyb3d8bbwe
+      RUNNER_PYTHON_DIR: C:\actions-runner\tools\python313
+      RUNNER_ARGOCD_DIR: C:\actions-runner\tools\argocd
+      KUBECONFIG: C:\actions-runner\tools\kube\config
     steps:
       - uses: actions/checkout@v4
 
