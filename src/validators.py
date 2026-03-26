@@ -7,6 +7,8 @@ from .utils import PocError
 
 def validate_metadata(metadata: dict[str, str], env_config: dict, field_mapping: dict) -> None:
     for field_name, config in field_mapping["description_fields"].items():
+        if field_name == "url":
+            continue
         if config.get("required") and not metadata.get(field_name):
             raise PocError(f"Missing required Jira deployment metadata: {field_name}")
 
@@ -14,9 +16,10 @@ def validate_metadata(metadata: dict[str, str], env_config: dict, field_mapping:
     if env not in env_config["environments"]:
         raise PocError(f"Unsupported environment: {env}")
 
-    parsed = urlparse(metadata["url"])
-    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
-        raise PocError(f"Invalid deployment URL: {metadata['url']}")
+    if metadata.get("url"):
+        parsed = urlparse(metadata["url"])
+        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+            raise PocError(f"Invalid deployment URL: {metadata['url']}")
 
 
 def validate_target(target: dict) -> None:

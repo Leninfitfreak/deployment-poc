@@ -40,6 +40,8 @@ This POC is aligned to the real LeninKart setup discovered from the workspace:
 7. the change is committed and pushed
 8. ArgoCD can be polled for `Synced` and `Healthy` if credentials are configured
 
+If a Jira ticket omits `url`, the orchestrator falls back to the config-mapped environment URL for the resolved app.
+
 ## Reusability
 
 To adapt this POC to another project, update only:
