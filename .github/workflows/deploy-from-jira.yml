@@ -26,7 +26,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Verify local runner toolchain
-        shell: powershell
+        shell: cmd
         run: |
           python --version
           git --version
@@ -34,11 +34,11 @@ jobs:
           argocd version --client
 
       - name: Install dependencies
-        shell: powershell
+        shell: cmd
         run: python -m pip install -r requirements.txt
 
       - name: Execute Jira deployment orchestrator
-        shell: powershell
+        shell: cmd
         env:
           JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
           JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
@@ -49,9 +49,7 @@ jobs:
           ARGOCD_INSECURE: "true"
           DEPLOY_GIT_USER: deployment-poc[bot]
           DEPLOY_GIT_EMAIL: deployment-poc@users.noreply.github.com
-        run: >
-          python -m src.orchestrator --jira-ticket "${{ inputs.jira_ticket }}"
-          ${{ inputs.trigger_argocd_sync && '--trigger-argocd-sync' || '' }}
+        run: python -m src.orchestrator --jira-ticket "${{ inputs.jira_ticket }}" ${{ inputs.trigger_argocd_sync && '--trigger-argocd-sync' || '' }}
 
       - name: Upload deployment artifacts
         if: always()
