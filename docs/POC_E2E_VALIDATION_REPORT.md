@@ -20,6 +20,12 @@ Validated live on March 27, 2026:
    - rollback mode safely detected that the last known good version was already live
    - no GitOps rollback commit was required
 
+3. Final regression validation after the last reporting/code polish
+   - ticket: `SCRUM-6`
+   - workflow run: `#17`
+   - result: `already_deployed`
+   - final branch head stayed healthy and idempotent
+
 Both runs completed on the active self-hosted runner:
 
 - runner: `leninkart-runner`
@@ -107,18 +113,18 @@ Note:
 Git-tracked state now records the last known successful deployment for `leninkart/frontend` in `dev`:
 
 - last version: `23599512080`
-- last requested version: `23599512080`
+- last requested version: `v2`
 - last GitOps commit: `a5530ce5dccff30803b262516d8e66edc0022040`
 - last ticket: `SCRUM-6`
-- last action: `rollback_skipped`
+- last action: `already_deployed`
 - last sync status: `Synced`
 - last health status: `Healthy`
 
 Git-tracked lock state shows the latest run was released cleanly:
 
-- latest lock run id: `23612368575`
+- latest lock run id: `23612528816`
 - status: `released`
-- note: `rollback_skipped`
+- note: `already_deployed`
 
 ## ArgoCD Verification
 
@@ -172,6 +178,11 @@ Validated in the working flow:
      - `status.sync.status == Synced`
      - `status.health.status == Healthy`
      - `status.sync.revision == expected GitOps SHA`
+
+7. Final branch-head regression check
+   - workflow run `#17` executed from commit `67bd0e9`
+   - result stayed `already_deployed`
+   - no new `leninkart-infra/dev` commit was created
 
 ## Reusability Status
 
