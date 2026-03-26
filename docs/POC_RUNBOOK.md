@@ -53,11 +53,15 @@ Token generation flow:
 
 1. Port-forward ArgoCD locally:
    `kubectl port-forward -n argocd svc/argocd-server 8085:443`
-2. Log in with an ArgoCD admin-capable account:
+2. Confirm the account is present in the live ConfigMap:
+   `kubectl get configmap argocd-cm -n argocd -o jsonpath='{.data.accounts\.github-actions}'`
+3. Log in with an ArgoCD admin-capable account:
    `argocd login 127.0.0.1:8085 --insecure --username <admin-user> --password <admin-password>`
-3. Generate an API token for the automation account:
+4. Confirm the account is visible to the API:
+   `argocd account list`
+5. Generate an API token for the automation account:
    `argocd account generate-token --account github-actions`
-4. Store the generated token in the `deployment-poc` GitHub repository secret:
+6. Store the generated token in the `deployment-poc` GitHub repository secret:
    `ARGOCD_AUTH_TOKEN`
 
 Related workflow secrets:
