@@ -10,7 +10,10 @@ from .utils import PocError
 
 class ArgoCdClient:
     def __init__(self, server: str | None, token: str | None, insecure: bool = False) -> None:
-        self.server = (server or "").rstrip("/")
+        raw_server = (server or "").strip()
+        if raw_server and "://" not in raw_server:
+            raw_server = f"https://{raw_server}"
+        self.server = raw_server.rstrip("/")
         self.token = token
         self.insecure = insecure
         self.session = requests.Session()
