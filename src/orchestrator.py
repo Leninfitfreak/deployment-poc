@@ -225,7 +225,7 @@ def main() -> int:
 
         postchecks = run_postchecks(target, argocd_status)
         target["effective_version"] = desired_version
-        if rollback_source_version:
+        if rollback_source_version and deployment_action in {"rolled_back", "rollback_skipped", "rollback_test_mode"}:
             target["rollback_source_version"] = rollback_source_version
         state_result = state_manager.mark_success(
             target,

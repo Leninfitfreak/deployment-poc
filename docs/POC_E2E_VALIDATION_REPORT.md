@@ -1,23 +1,37 @@
 # POC E2E Validation Report
 
-## Latest Validated Run
+## Executive Summary
 
-- Jira ticket: `SCRUM-6`
-- Jira project: `SCRUM`
-- Workflow: `.github/workflows/deploy-from-jira.yml`
-- Workflow run: `#14`
-- Run URL: `https://github.com/Leninfitfreak/deployment-poc/actions/runs/23611829756`
-- Runner: `leninkart-runner`
-- Runner labels:
+The hardened Jira -> GitHub Actions -> self-hosted runner -> GitOps -> ArgoCD flow remains healthy after the new safety
+layer was added.
+
+Validated live on March 27, 2026:
+
+1. Normal rerun / idempotency validation
+   - ticket: `SCRUM-6`
+   - workflow run: `#15`
+   - result: `already_deployed`
+   - no duplicate GitOps commit was created
+
+2. Rollback path validation
+   - ticket: `SCRUM-6`
+   - workflow run: `#16`
+   - result: `rollback_skipped`
+   - rollback mode safely detected that the last known good version was already live
+   - no GitOps rollback commit was required
+
+Both runs completed on the active self-hosted runner:
+
+- runner: `leninkart-runner`
+- labels:
   - `self-hosted`
   - `Windows`
   - `X64`
   - `leninkart`
   - `local`
   - `dev`
-- Final verdict: `SUCCESS`
 
-## Jira Metadata
+## Ticket Metadata
 
 ```text
 app: leninkart
@@ -34,37 +48,91 @@ version: v2
 - Namespace: `dev`
 - GitOps repo: `https://github.com/Leninfitfreak/leninkart-infra.git`
 - GitOps branch: `dev`
-- Changed file: `applications/frontend/helm/values-dev.yaml`
+- Values file: `applications/frontend/helm/values-dev.yaml`
 - ArgoCD application: `frontend-dev`
 - Requested version: `v2`
 - Resolved deployable version: `23599512080`
-- Resolved URL: `http://dev.leninkart.local`
+- Runtime URL: `http://dev.leninkart.local`
 
-## GitOps Result
+## Live Validation 1: Idempotent Rerun
 
-- Deployment action: `reconciled`
-- Existing GitOps commit verified in `leninkart-infra/dev`: `a5530ce5dccff30803b262516d8e66edc0022040`
-- No duplicate GitOps commit was created on rerun
-- Final GitOps image tag remained: `23599512080`
+- Workflow: `.github/workflows/deploy-from-jira.yml`
+- Run number: `#15`
+- Run URL: `https://github.com/Leninfitfreak/deployment-poc/actions/runs/23612282256`
+- Deployment action: `already_deployed`
+- Final verdict: `SUCCESS`
 
-## ArgoCD Result
+Result:
 
-- Final sync status: `Synced`
-- Final health status: `Healthy`
-- Final synced revision: `a5530ce5dccff30803b262516d8e66edc0022040`
-- Final deployed image: `leninfitfreak/frontend:23599512080`
+- current GitOps revision already pointed at the requested version
+- ArgoCD already had `frontend-dev` at:
+  - `Sync = Synced`
+  - `Health = Healthy`
+  - `Revision = a5530ce5dccff30803b262516d8e66edc0022040`
+- the workflow exited cleanly without creating a new `leninkart-infra/dev` commit
 
-Live verification:
+Tracked workflow-side safety results:
+
+- lock acquire commit in `deployment-poc/main`: `432cf92`
+- state update commit in `deployment-poc/main`: `581a6d3`
+- lock release commit in `deployment-poc/main`: `a76bdd0`
+
+## Live Validation 2: Rollback Mode
+
+- Workflow: `.github/workflows/deploy-from-jira.yml`
+- Run number: `#16`
+- Run URL: `https://github.com/Leninfitfreak/deployment-poc/actions/runs/23612368575`
+- Deployment action: `rollback_skipped`
+- Final verdict: `SUCCESS`
+
+Result:
+
+- rollback mode resolved the last known successful deployment state from `config/deployment_state.yaml`
+- the stored last good version was already live
+- the workflow performed exact ArgoCD verification and exited safely without changing `leninkart-infra/dev`
+
+Tracked workflow-side safety results:
+
+- lock acquire commit in `deployment-poc/main`: `d3c4c59`
+- state update commit in `deployment-poc/main`: `f85d704`
+- lock release commit in `deployment-poc/main`: `3f88f78`
+
+Note:
+
+- the rollback validation remained GitOps-safe because it did not mutate the cluster directly
+- it also remained production-safe because it did not push a needless revert when the known good revision was already active
+
+## Current Deployment State
+
+Git-tracked state now records the last known successful deployment for `leninkart/frontend` in `dev`:
+
+- last version: `23599512080`
+- last requested version: `23599512080`
+- last GitOps commit: `a5530ce5dccff30803b262516d8e66edc0022040`
+- last ticket: `SCRUM-6`
+- last action: `rollback_skipped`
+- last sync status: `Synced`
+- last health status: `Healthy`
+
+Git-tracked lock state shows the latest run was released cleanly:
+
+- latest lock run id: `23612368575`
+- status: `released`
+- note: `rollback_skipped`
+
+## ArgoCD Verification
+
+Live cluster verification after the hardening runs:
 
 ```text
 kubectl get application frontend-dev -n argocd -o jsonpath='{.status.sync.status} {.status.health.status} {.status.sync.revision} {.status.operationState.phase}'
 Synced Healthy a5530ce5dccff30803b262516d8e66edc0022040 Succeeded
 ```
 
+The GitOps repo head stayed unchanged through both safety validations:
+
 ```text
-kubectl get deploy,pods -n dev -l app=frontend -o wide
-deployment.apps/frontend   1/1   1   1   ...   leninfitfreak/frontend:23599512080
-pod/frontend-5778479f6d-ht4ck   1/1   Running   ...
+leninkart-infra/dev = a5530ce5dccff30803b262516d8e66edc0022040
 ```
 
 ## URL Post-Check
@@ -79,59 +147,38 @@ pod/frontend-5778479f6d-ht4ck   1/1   Running   ...
 This warning does not invalidate the deployment because the application, service, and ingress-backed localhost route
 were all reachable from the runner machine.
 
-## Hardening Added
+## Hardening Coverage Confirmed
 
-The latest validation includes the following hardening improvements:
+Validated in the working flow:
 
-1. Exact ArgoCD revision verification
-   - success now requires:
+1. Deployment state tracking
+   - `config/deployment_state.yaml` is updated only after verified success
+
+2. Deployment locking
+   - `config/deploy_locks.yaml` is acquired and released by the workflow itself
+
+3. Stronger idempotency
+   - same ticket and same live version exit cleanly as `already_deployed`
+
+4. Retry-safe orchestration
+   - reruns reuse the live GitOps and ArgoCD state instead of creating duplicate deployment commits
+
+5. Rollback support
+   - explicit rollback mode exists
+   - rollback mode safely no-ops when the last known good revision is already live
+
+6. Exact ArgoCD revision verification
+   - success still requires:
      - `status.sync.status == Synced`
      - `status.health.status == Healthy`
-     - `status.sync.revision == pushed GitOps commit SHA`
-
-2. Duplicate deployment prevention
-   - the orchestrator exits cleanly as `already_deployed` or `reconciled` instead of creating duplicate GitOps commits
-
-3. Config-driven version resolution
-   - Jira-friendly versions such as `v1` and `v2` resolve through `config/app_mapping.yaml`
-
-4. Environment restriction
-   - current deployment-poc instance allows only `dev` through `config/global.yaml`
-
-5. Safe test mode
-   - `TEST_MODE=true` simulates the GitOps and ArgoCD result without pushing
-
-6. Local DNS fallback handling
-   - local `.local` hostname failures degrade to `WARNING`, then retry via localhost with the correct host header
-
-7. Git-tracked deployment state and locks
-   - `config/deployment_state.yaml` records the last known successful deployment state
-   - `config/deploy_locks.yaml` prevents overlapping deployments for the same app/environment
-
-8. Explicit rollback path
-   - `python -m src.orchestrator --jira-ticket <ticket> --rollback-to-last-success`
-   - rollback reuses the stored last known successful version and exact ArgoCD revision verification
-
-## Additional Validation Evidence
-
-- Ticket creation workflow:
-  - `.github/workflows/create-jira-test-ticket.yml`
-  - created `SCRUM-6` successfully on the self-hosted runner
-- Previous successful baseline:
-  - `SCRUM-5`
-  - proved the original working Jira -> GitHub Actions -> GitOps -> ArgoCD path
+     - `status.sync.revision == expected GitOps SHA`
 
 ## Reusability Status
 
 The POC remains reusable because:
 
-- runner labels are centralized in workflow config
-- project and environment scope are driven by:
-  - `config/global.yaml`
-  - `config/projects.yaml`
-  - `config/app_mapping.yaml`
-  - `config/environments.yaml`
-  - `config/jira_field_mapping.yaml`
-- secrets remain externalized in GitHub repository secrets
-- no direct cluster mutation is used for deployments
+- project and environment details remain config-driven
+- deployment state and lock files are generic by project/app/environment key
+- rollback behavior is controlled by `config/deployment_policy.yaml`
+- secrets remain externalized
 - the orchestration logic remains separate from `project-validation`
