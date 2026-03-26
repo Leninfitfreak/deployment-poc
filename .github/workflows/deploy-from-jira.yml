@@ -25,7 +25,6 @@ jobs:
     env:
       RUNNER_PYTHON_DIR: C:\Users\hp\AppData\Local\Programs\Python\Python313
       RUNNER_ARGOCD_DIR: C:\Users\hp\AppData\Local\Microsoft\WinGet\Packages\argoproj.argocd_Microsoft.Winget.Source_8wekyb3d8bbwe
-      ARGOCD_PORT_FORWARD_LOG: ${{ runner.temp }}\argocd-port-forward.log
     steps:
       - uses: actions/checkout@v4
 
@@ -46,7 +45,7 @@ jobs:
       - name: Start local ArgoCD port-forward
         shell: cmd
         run: |
-          start "argocd-port-forward" /B kubectl port-forward -n argocd svc/argocd-server 8085:443 > "%ARGOCD_PORT_FORWARD_LOG%" 2>&1
+          start "argocd-port-forward" /B kubectl port-forward -n argocd svc/argocd-server 8085:443 > "%RUNNER_TEMP%\argocd-port-forward.log" 2>&1
           powershell -NoProfile -ExecutionPolicy Bypass -Command "$deadline=(Get-Date).AddSeconds(60); while((Get-Date) -lt $deadline){ try { $client = New-Object System.Net.Sockets.TcpClient; $iar = $client.BeginConnect('127.0.0.1',8085,$null,$null); if($iar.AsyncWaitHandle.WaitOne(2000,$false) -and $client.Connected){ $client.Close(); exit 0 }; $client.Close() } catch {}; Start-Sleep -Seconds 1 }; exit 1"
 
       - name: Verify local runner toolchain
