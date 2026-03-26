@@ -2,10 +2,8 @@ locks:
   leninkart/frontend:
     dev:
       ticket: SCRUM-6
-      run_id: '23612368575'
-      requested_version: '23599512080'
+      run_id: '23612528816'
+      requested_version: v2
       resolved_version: '23599512080'
-      acquired_at: '2026-03-26T18:52:29+00:00'
-      status: released
-      released_at: '2026-03-26T18:52:38+00:00'
-      note: rollback_skipped
+      acquired_at: '2026-03-26T18:56:03+00:00'
+      status: in_progress
