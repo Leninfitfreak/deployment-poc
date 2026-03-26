@@ -1,0 +1,37 @@
+apps:
+  frontend:
+    project: leninkart
+    aliases: [frontend, leninkart-frontend, web]
+    values_path_by_env:
+      dev: applications/frontend/helm/values-dev.yaml
+    argocd_app_by_env:
+      dev: frontend-dev
+    namespace_by_env:
+      dev: dev
+    ingress_url_by_env:
+      dev: http://dev.leninkart.local
+
+  product-service:
+    project: leninkart
+    aliases: [product-service, product, products]
+    values_path_by_env:
+      dev: applications/product-service/helm/values-dev.yaml
+    argocd_app_by_env:
+      dev: dev-product-service
+    namespace_by_env:
+      dev: dev
+    ingress_url_by_env:
+      dev: http://dev.leninkart.local/api/products
+
+  order-service:
+    project: leninkart
+    aliases: [order-service, order, orders]
+    values_path_by_env:
+      dev: applications/order-service/helm/values-dev.yaml
+    argocd_app_by_env:
+      dev: dev-order-service
+    namespace_by_env:
+      dev: dev
+    ingress_url_by_env:
+      dev: http://dev.leninkart.local/api/orders
+

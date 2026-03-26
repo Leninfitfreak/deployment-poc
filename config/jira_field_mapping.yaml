@@ -1,0 +1,16 @@
+description_fields:
+  app:
+    aliases: [app, project, application]
+    required: true
+  component:
+    aliases: [component, service, target]
+    required: false
+  env:
+    aliases: [env, environment]
+    required: true
+  version:
+    aliases: [version, image_tag, tag, release]
+    required: true
+  url:
+    aliases: [url, endpoint]
+    required: true

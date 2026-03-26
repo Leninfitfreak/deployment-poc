@@ -1,0 +1,10 @@
+environments:
+  dev:
+    namespace: dev
+    cluster_context: k3d-leninkart-dev
+    argocd_root_app: leninkart-root
+    requires_argocd_verification: false
+    notes: >
+      Current LeninKart development environment. Repo-backed GitOps discovery is authoritative.
+      Live cluster checks require the local k3d / Docker runtime to be available.
+
