@@ -142,10 +142,23 @@ python -m src.orchestrator --jira-ticket SCRUM-5
 
 ## Rollback
 
-Rollback support is intentionally conservative.
+Rollback support is intentionally conservative and now has an explicit CLI path.
 
-Use the previous successful deployment metadata in `config/deployment_state.yaml` to restore the prior version through a
-normal GitOps commit in `leninkart-infra`.
+Manual rollback:
+
+```powershell
+python -m src.orchestrator --jira-ticket SCRUM-6 --rollback-to-last-success
+```
+
+The orchestrator will:
+
+1. parse the Jira ticket normally
+2. resolve the target app/environment normally
+3. load the last known successful deployment state from `config/deployment_state.yaml`
+4. push a corrective GitOps commit back to that stored version
+5. verify ArgoCD reaches `Synced` and `Healthy` on the exact rollback revision
+
+Automatic rollback is available only when enabled in `config/deployment_policy.yaml`.
 
 Reference:
 

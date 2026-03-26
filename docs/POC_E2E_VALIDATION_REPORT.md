@@ -5,8 +5,8 @@
 - Jira ticket: `SCRUM-6`
 - Jira project: `SCRUM`
 - Workflow: `.github/workflows/deploy-from-jira.yml`
-- Workflow run: `#13`
-- Run URL: `https://github.com/Leninfitfreak/deployment-poc/actions/runs/23611209271`
+- Workflow run: `#14`
+- Run URL: `https://github.com/Leninfitfreak/deployment-poc/actions/runs/23611829756`
 - Runner: `leninkart-runner`
 - Runner labels:
   - `self-hosted`
@@ -42,9 +42,10 @@ version: v2
 
 ## GitOps Result
 
-- Commit pushed to `leninkart-infra/dev`: `a5530ce5dccff30803b262516d8e66edc0022040`
-- Commit message: `deploy(frontend): jira-SCRUM-6 -> 23599512080`
-- Final GitOps image tag: `23599512080`
+- Deployment action: `reconciled`
+- Existing GitOps commit verified in `leninkart-infra/dev`: `a5530ce5dccff30803b262516d8e66edc0022040`
+- No duplicate GitOps commit was created on rerun
+- Final GitOps image tag remained: `23599512080`
 
 ## ArgoCD Result
 
@@ -89,7 +90,7 @@ The latest validation includes the following hardening improvements:
      - `status.sync.revision == pushed GitOps commit SHA`
 
 2. Duplicate deployment prevention
-   - the orchestrator blocks redeploying the same resolved version unless duplicate deployments are explicitly allowed
+   - the orchestrator exits cleanly as `already_deployed` or `reconciled` instead of creating duplicate GitOps commits
 
 3. Config-driven version resolution
    - Jira-friendly versions such as `v1` and `v2` resolve through `config/app_mapping.yaml`
@@ -102,6 +103,14 @@ The latest validation includes the following hardening improvements:
 
 6. Local DNS fallback handling
    - local `.local` hostname failures degrade to `WARNING`, then retry via localhost with the correct host header
+
+7. Git-tracked deployment state and locks
+   - `config/deployment_state.yaml` records the last known successful deployment state
+   - `config/deploy_locks.yaml` prevents overlapping deployments for the same app/environment
+
+8. Explicit rollback path
+   - `python -m src.orchestrator --jira-ticket <ticket> --rollback-to-last-success`
+   - rollback reuses the stored last known successful version and exact ArgoCD revision verification
 
 ## Additional Validation Evidence
 

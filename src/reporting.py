@@ -31,6 +31,7 @@ def write_reports(root: Path, result: dict) -> None:
                 f"- Previous version: `{target.get('previous_version', '')}`",
                 f"- Requested version: `{target.get('requested_version', '')}`",
                 f"- Resolved version: `{target.get('resolved_version', '')}`",
+                f"- Effective version: `{target.get('effective_version', '')}`",
                 f"- GitOps repo: `{target.get('gitops_repo', '')}`",
                 f"- GitOps branch: `{target.get('gitops_branch', '')}`",
                 f"- Values path: `{target.get('values_path', '')}`",
@@ -38,6 +39,8 @@ def write_reports(root: Path, result: dict) -> None:
                 f"- Namespace: `{target.get('namespace', '')}`",
             ]
         )
+        if target.get("rollback_source_version"):
+            markdown.append(f"- Rollback source version: `{target.get('rollback_source_version', '')}`")
 
     if result.get("error"):
         markdown.extend(["", "## Error", "", f"`{result['error']}`"])
@@ -49,6 +52,10 @@ def write_reports(root: Path, result: dict) -> None:
             "",
             f"```json\n{result.get('prechecks_json', '{}')}\n```",
             "",
+            "## ArgoCD Status",
+            "",
+            f"```json\n{result.get('argocd_status_json', '{}')}\n```",
+            "",
             "## Lock Result",
             "",
             f"```json\n{result.get('lock_json', '{}')}\n```",
@@ -56,6 +63,10 @@ def write_reports(root: Path, result: dict) -> None:
             "## State Result",
             "",
             f"```json\n{result.get('state_json', '{}')}\n```",
+            "",
+            "## Rollback Result",
+            "",
+            f"```json\n{result.get('rollback_json', '{}')}\n```",
             "",
             "## Post-checks",
             "",

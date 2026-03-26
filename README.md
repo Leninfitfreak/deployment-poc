@@ -65,6 +65,8 @@ The POC now includes a minimal production-style safety layer:
 - duplicate deployment prevention
 - retry-safe reconciliation handling
 - rollback-ready state history
+- explicit rollback mode via `--rollback-to-last-success`
+- policy-driven safety toggles in `config/deployment_policy.yaml`
 
 ## Safe Test Mode
 
@@ -77,6 +79,23 @@ In test mode the orchestrator:
 - updates the GitOps file only in the temporary clone
 - skips the real push
 - returns a simulated successful ArgoCD status for reporting
+
+## Rollback Mode
+
+For a safe manual rollback to the last known successful deployment state for the resolved app and environment:
+
+```powershell
+python -m src.orchestrator --jira-ticket SCRUM-6 --rollback-to-last-success
+```
+
+This mode:
+
+- reads `config/deployment_state.yaml`
+- resolves the last known successful version for the app and environment
+- updates the GitOps values file back to that version
+- waits for ArgoCD to report `Synced` and `Healthy` on the exact rollback commit
+
+Automatic rollback remains policy-gated and disabled by default in `config/deployment_policy.yaml`.
 
 ## Runtime Note
 

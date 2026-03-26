@@ -3,3 +3,5 @@ policy:
   auto_rollback_enabled: false
   allow_duplicate_deployments: false
   url_fallback_warning_enabled: true
+  manual_rollback_enabled: true
+  retry_reconcile_without_redeploy: true

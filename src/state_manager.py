@@ -74,7 +74,22 @@ class DeploymentStateManager:
             .get(target["environment"], {})
         )
 
-    def acquire_lock(self, target: dict, jira_ticket: str, run_id: str, requested_version: str) -> dict:
+    def get_lock_state(self, target: dict) -> dict:
+        locks = self._load_locks()
+        return (
+            locks.get("locks", {})
+            .get(self._deployment_key(target), {})
+            .get(target["environment"], {})
+        )
+
+    def acquire_lock(
+        self,
+        target: dict,
+        jira_ticket: str,
+        run_id: str,
+        requested_version: str,
+        resolved_version: str,
+    ) -> dict:
         self._sync_latest()
         locks = self._load_locks()
         deployment_key = self._deployment_key(target)
@@ -93,7 +108,7 @@ class DeploymentStateManager:
             "ticket": jira_ticket,
             "run_id": run_id,
             "requested_version": requested_version,
-            "resolved_version": target["resolved_version"],
+            "resolved_version": resolved_version,
             "acquired_at": utc_now_iso(),
             "status": "in_progress",
         }
@@ -125,25 +140,45 @@ class DeploymentStateManager:
         )
         return {"entry": env_locks[target["environment"]], "commit": commit}
 
-    def mark_success(self, target: dict, jira_ticket: str, gitops_commit: str, argocd_status: dict, changed_file: str) -> dict:
+    def mark_success(
+        self,
+        target: dict,
+        jira_ticket: str,
+        gitops_commit: str,
+        argocd_status: dict,
+        changed_file: str,
+        *,
+        deployed_version: str,
+        requested_version: str,
+        action: str,
+        rollback_source_version: str = "",
+    ) -> dict:
         self._sync_latest()
         state = self._load_state()
         deployment_key = self._deployment_key(target)
         env_state = state.setdefault("deployments", {}).setdefault(deployment_key, {})
         previous = env_state.get(target["environment"], {})
+        if previous.get("last_version") and previous.get("last_version") != deployed_version:
+            previous_successful_version = previous.get("last_version")
+            previous_successful_gitops_commit = previous.get("last_gitops_commit")
+        else:
+            previous_successful_version = previous.get("previous_successful_version")
+            previous_successful_gitops_commit = previous.get("previous_successful_gitops_commit")
         env_state[target["environment"]] = {
-            "last_version": target["resolved_version"],
-            "last_requested_version": target["requested_version"],
+            "last_version": deployed_version,
+            "last_requested_version": requested_version,
             "last_gitops_commit": gitops_commit,
             "last_ticket": jira_ticket,
             "last_argocd_app": target["argocd_app"],
             "last_changed_file": changed_file,
             "last_deployed_at": utc_now_iso(),
             "last_status": "success",
+            "last_action": action,
             "last_sync_status": argocd_status.get("sync"),
             "last_health_status": argocd_status.get("health"),
-            "previous_successful_version": previous.get("last_version"),
-            "previous_successful_gitops_commit": previous.get("last_gitops_commit"),
+            "previous_successful_version": previous_successful_version,
+            "previous_successful_gitops_commit": previous_successful_gitops_commit,
+            "rollback_source_version": rollback_source_version or None,
         }
         self._save_state(state)
         commit = self._commit_and_push(
@@ -151,4 +186,3 @@ class DeploymentStateManager:
             f"chore(state): record {target['app_key']} {target['environment']} deployment for {jira_ticket}",
         )
         return {"entry": env_state[target["environment"]], "commit": commit}
-

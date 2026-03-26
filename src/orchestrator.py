@@ -41,6 +41,7 @@ def main() -> int:
     parser.add_argument("--trigger-argocd-sync", action="store_true")
     parser.add_argument("--argocd-timeout-seconds", type=int, default=600)
     parser.add_argument("--test-mode", action="store_true")
+    parser.add_argument("--rollback-to-last-success", action="store_true")
     args = parser.parse_args()
 
     root = repo_root()
@@ -60,10 +61,13 @@ def main() -> int:
         validate_target(target)
         validate_version_resolution(target)
         test_mode = args.test_mode or env_flag("TEST_MODE")
+        if args.rollback_to_last_success and not read_yaml(root / "config" / "deployment_policy.yaml").get("policy", {}).get("manual_rollback_enabled", True):
+            raise PocError("Manual rollback is disabled by deployment_policy.yaml")
         target["previous_version"] = ""
         git_user = os.environ.get("DEPLOY_GIT_USER", "deployment-poc[bot]")
         git_email = os.environ.get("DEPLOY_GIT_EMAIL", "deployment-poc@users.noreply.github.com")
-        state_manager = DeploymentStateManager(root, read_yaml(root / "config" / "deployment_policy.yaml"), git_user, git_email, test_mode)
+        policy = read_yaml(root / "config" / "deployment_policy.yaml")
+        state_manager = DeploymentStateManager(root, policy, git_user, git_email, test_mode)
 
         argocd = ArgoCdClient(
             os.environ.get("ARGOCD_SERVER"),
@@ -73,11 +77,26 @@ def main() -> int:
         previous_state = state_manager.get_last_successful_state(target)
         target["previous_version"] = previous_state.get("last_version", "")
         lock_result = state_result = {}
+        rollback_result = {}
         deployment_action = "deploy"
         current_tag = ""
         gitops_commit = ""
+        desired_version = target["resolved_version"]
+        requested_version = target["requested_version"]
+        rollback_source_version = ""
 
-        lock_result = state_manager.acquire_lock(target, issue.key, run_id, metadata["version"])
+        if args.rollback_to_last_success:
+            rollback_version = previous_state.get("last_version", "").strip()
+            if not rollback_version:
+                raise PocError(
+                    f"No last successful deployment state exists for {target['project_key']}/{target['app_key']} "
+                    f"in {target['environment']}, so rollback cannot proceed"
+                )
+            desired_version = rollback_version
+            requested_version = rollback_version
+            deployment_action = "rollback_requested"
+
+        lock_result = state_manager.acquire_lock(target, issue.key, run_id, requested_version, desired_version)
 
         argocd_status = None
         with GitOpsRepoManager(
@@ -88,19 +107,20 @@ def main() -> int:
             current_tag = gitops.get_current_image_tag(target["values_path"])
             current_revision = gitops.get_current_revision()
             prechecks = run_prechecks(target, gitops.repo_dir, argocd)
+            rollback_source_version = current_tag
 
             already_successful_same_ticket = (
                 previous_state.get("last_status") == "success"
                 and previous_state.get("last_ticket") == issue.key
-                and previous_state.get("last_version") == target["resolved_version"]
+                and previous_state.get("last_version") == desired_version
             )
 
             already_successful_same_version = (
                 previous_state.get("last_status") == "success"
-                and previous_state.get("last_version") == target["resolved_version"]
+                and previous_state.get("last_version") == desired_version
             )
 
-            if current_tag == target["resolved_version"]:
+            if current_tag == desired_version:
                 if test_mode:
                     deployment_action = "reconciled"
                     gitops_commit = current_revision
@@ -121,42 +141,103 @@ def main() -> int:
                         expected_revision=current_revision,
                     )
                     gitops_commit = current_revision
-                    deployment_action = "skipped" if (already_successful_same_ticket or already_successful_same_version) else "reconciled"
+                    if args.rollback_to_last_success:
+                        deployment_action = "rollback_skipped"
+                    elif already_successful_same_ticket or already_successful_same_version:
+                        deployment_action = "already_deployed"
+                    else:
+                        deployment_action = "reconciled"
                 else:
                     raise PocError(
                         f"Target {target['app_key']} in {target['environment']} is already at version "
-                        f"{target['resolved_version']}, but ArgoCD verification is not configured"
+                        f"{desired_version}, but ArgoCD verification is not configured"
                     )
             else:
-                updated_file = gitops.update_image_tag(target["values_path"], target["resolved_version"])
+                updated_file = gitops.update_image_tag(target["values_path"], desired_version)
+                commit_message = (
+                    f"rollback({target['app_key']}): jira-{issue.key} -> {desired_version}"
+                    if args.rollback_to_last_success
+                    else f"deploy({target['app_key']}): jira-{issue.key} -> {desired_version}"
+                )
                 gitops_commit = gitops.commit_and_push(
                     updated_file,
-                    f"deploy({target['app_key']}): jira-{issue.key} -> {target['resolved_version']}",
+                    commit_message,
                     git_user,
                     git_email,
                     test_mode=test_mode,
                 )
-                if test_mode:
-                    argocd_status = {
-                        "sync": "Synced",
-                        "health": "Healthy",
-                        "revision": gitops_commit,
-                        "operation_revision": gitops_commit,
-                        "operation_phase": "Succeeded",
-                        "raw": {"simulated": True},
-                    }
-                elif argocd.configured():
-                    if args.trigger_argocd_sync:
-                        argocd.sync_app(target["argocd_app"])
-                    argocd_status = argocd.wait_until_synced_and_healthy(
-                        target["argocd_app"],
-                        timeout_seconds=args.argocd_timeout_seconds,
-                        expected_revision=gitops_commit,
+                try:
+                    if test_mode:
+                        argocd_status = {
+                            "sync": "Synced",
+                            "health": "Healthy",
+                            "revision": gitops_commit,
+                            "operation_revision": gitops_commit,
+                            "operation_phase": "Succeeded",
+                            "raw": {"simulated": True},
+                        }
+                    elif argocd.configured():
+                        if args.trigger_argocd_sync:
+                            argocd.sync_app(target["argocd_app"])
+                        argocd_status = argocd.wait_until_synced_and_healthy(
+                            target["argocd_app"],
+                            timeout_seconds=args.argocd_timeout_seconds,
+                            expected_revision=gitops_commit,
+                        )
+                    deployment_action = (
+                        "rollback_test_mode"
+                        if args.rollback_to_last_success and test_mode
+                        else "rolled_back"
+                        if args.rollback_to_last_success
+                        else "test_mode"
+                        if test_mode
+                        else "deployed"
                     )
-                deployment_action = "test_mode" if test_mode else "deployed"
+                except PocError as deploy_error:
+                    if (
+                        not args.rollback_to_last_success
+                        and not test_mode
+                        and policy.get("policy", {}).get("auto_rollback_enabled", False)
+                        and previous_state.get("last_version")
+                        and previous_state.get("last_version") != desired_version
+                    ):
+                        rollback_version = previous_state["last_version"]
+                        rollback_file = gitops.update_image_tag(target["values_path"], rollback_version)
+                        rollback_commit = gitops.commit_and_push(
+                            rollback_file,
+                            f"rollback({target['app_key']}): jira-{issue.key} -> {rollback_version}",
+                            git_user,
+                            git_email,
+                            test_mode=False,
+                        )
+                        rollback_status = argocd.wait_until_synced_and_healthy(
+                            target["argocd_app"],
+                            timeout_seconds=args.argocd_timeout_seconds,
+                            expected_revision=rollback_commit,
+                        )
+                        rollback_result = {
+                            "performed": True,
+                            "rollback_version": rollback_version,
+                            "rollback_commit": rollback_commit,
+                            "rollback_status": rollback_status,
+                        }
+                    raise deploy_error
 
         postchecks = run_postchecks(target, argocd_status)
-        state_result = state_manager.mark_success(target, issue.key, gitops_commit, argocd_status or {}, target["values_path"])
+        target["effective_version"] = desired_version
+        if rollback_source_version:
+            target["rollback_source_version"] = rollback_source_version
+        state_result = state_manager.mark_success(
+            target,
+            issue.key,
+            gitops_commit,
+            argocd_status or {},
+            target["values_path"],
+            deployed_version=desired_version,
+            requested_version=requested_version,
+            action=deployment_action,
+            rollback_source_version=rollback_source_version if deployment_action in {"rolled_back", "rollback_skipped", "rollback_test_mode"} else "",
+        )
         lock_result = state_manager.release_lock(target, issue.key, "released", deployment_action)
         result = {
             "jira_ticket": issue.key,
@@ -170,8 +251,10 @@ def main() -> int:
             "test_mode": test_mode,
             "outcome": "success",
             "prechecks_json": json.dumps(prechecks, indent=2),
+            "argocd_status_json": json.dumps(argocd_status or {}, indent=2),
             "lock_json": json.dumps(lock_result, indent=2),
             "state_json": json.dumps(state_result, indent=2),
+            "rollback_json": json.dumps(rollback_result, indent=2),
             "postchecks_json": json.dumps(postchecks, indent=2),
         }
         write_reports(root, result)
@@ -180,6 +263,7 @@ def main() -> int:
     except PocError as exc:
         failure_lock = {}
         failure_state = {}
+        failure_rollback = locals().get("rollback_result", {})
         try:
             if "state_manager" in locals() and "target" in locals() and "issue" in locals():
                 failure_lock = state_manager.release_lock(
@@ -196,8 +280,10 @@ def main() -> int:
             "outcome": "failure",
             "error": str(exc),
             "prechecks_json": "{}",
+            "argocd_status_json": "{}",
             "lock_json": json.dumps(failure_lock, indent=2),
             "state_json": json.dumps(failure_state, indent=2),
+            "rollback_json": json.dumps(failure_rollback, indent=2),
             "postchecks_json": "{}",
             "target": {
                 "project_key": "",
@@ -208,6 +294,7 @@ def main() -> int:
                 "values_path": "",
                 "argocd_app": "",
                 "namespace": "",
+                "effective_version": "",
             },
         }
         write_reports(root, result)

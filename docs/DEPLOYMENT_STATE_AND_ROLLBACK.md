@@ -68,7 +68,7 @@ Do not edit the cluster directly for lock recovery.
 The hardened orchestrator now behaves as follows:
 
 1. If the same app/environment/version is already deployed and ArgoCD is healthy on that exact GitOps revision, the run
-   exits cleanly as `skipped` or `reconciled`.
+   exits cleanly as `already_deployed` or `reconciled`.
 2. If the same Jira ticket is rerun after a successful deployment, the run exits cleanly instead of creating another
    GitOps commit.
 3. If a deployment for the same app/environment is already in progress, the run fails clearly because the lock cannot be
@@ -84,15 +84,21 @@ Current building blocks:
 - GitOps value path is known for the target app/environment
 - rollback can be performed by restoring the previous successful version and pushing a corrective GitOps commit
 
+Supported rollback modes:
+
+1. Manual rollback
+   - `python -m src.orchestrator --jira-ticket <TICKET> --rollback-to-last-success`
+2. Policy-gated automatic rollback
+   - controlled by `policy.auto_rollback_enabled`
+   - disabled by default
+   - used only if a new GitOps revision is pushed but never reaches `Synced` and `Healthy`
+
 Recommended rollback procedure for the current dev scope:
 
-1. read `config/deployment_state.yaml`
-2. identify:
-   - `previous_successful_version`
-   - `previous_successful_gitops_commit`
-3. update the target values file in `leninkart-infra/dev`
-4. commit a rollback change
-5. verify ArgoCD returns to `Synced` and `Healthy`
+1. run the explicit rollback mode for the same Jira ticket or an equivalent app/environment-scoped ticket
+2. confirm the rollback target from `config/deployment_state.yaml`
+3. verify the rollback commit pushed to the GitOps repo
+4. verify ArgoCD returns to `Synced` and `Healthy` on the exact rollback revision
 
 This path is practical for the current frontend/dev deployment model because the GitOps value file controls a single
 image tag.
