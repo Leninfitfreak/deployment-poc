@@ -1,1 +1,15 @@
-deployments: {}
+deployments:
+  leninkart/frontend:
+    dev:
+      last_version: '23599512080'
+      last_requested_version: v2
+      last_gitops_commit: a5530ce5dccff30803b262516d8e66edc0022040
+      last_ticket: SCRUM-6
+      last_argocd_app: frontend-dev
+      last_changed_file: applications/frontend/helm/values-dev.yaml
+      last_deployed_at: '2026-03-26T18:40:10+00:00'
+      last_status: success
+      last_sync_status: Synced
+      last_health_status: Healthy
+      previous_successful_version: null
+      previous_successful_gitops_commit: null
