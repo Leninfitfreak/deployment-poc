@@ -1,0 +1,51 @@
+name: Deploy From Jira
+
+on:
+  workflow_dispatch:
+    inputs:
+      jira_ticket:
+        description: Jira ticket key, for example SCRUM-5
+        required: true
+        type: string
+      trigger_argocd_sync:
+        description: Trigger ArgoCD sync explicitly after GitOps commit
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Execute Jira deployment orchestrator
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          INFRA_PAT: ${{ secrets.INFRA_PAT }}
+          ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
+          ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
+          DEPLOY_GIT_USER: deployment-poc[bot]
+          DEPLOY_GIT_EMAIL: deployment-poc@users.noreply.github.com
+        run: |
+          python -m src.orchestrator \
+            --jira-ticket "${{ inputs.jira_ticket }}" \
+            ${{ inputs.trigger_argocd_sync && '--trigger-argocd-sync' || '' }}
+
+      - name: Upload deployment artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-result
+          path: artifacts/
