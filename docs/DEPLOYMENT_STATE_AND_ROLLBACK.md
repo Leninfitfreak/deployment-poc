@@ -36,12 +36,27 @@ Each lock is scoped by:
 
 Each lock stores:
 
+- app key
+- environment
 - Jira ticket
 - workflow run id
+- workflow run URL
+- workflow actor
+- runner name
+- repository
+- workflow name
 - requested version
 - resolved version
 - acquisition timestamp
+- last-updated timestamp
 - status
+
+Supported lock statuses:
+
+- `in_progress`
+- `released`
+- `force_released`
+- `stale` classification is used during inspection and reporting before a dead lock is force-released
 
 ## Stale Lock Recovery
 
@@ -49,17 +64,29 @@ Lock timeout is controlled by:
 
 - `config/deployment_policy.yaml`
 
-Current field:
+Current policy fields:
 
 - `policy.lock_timeout_minutes`
+- `policy.stale_lock_check_enabled`
+- `policy.auto_release_stale_locks`
+- `policy.allow_force_unlock`
+- `policy.unlock_requires_run_check`
 
-If a lock remains `in_progress` beyond that timeout, the next run may replace it as stale.
+Current behavior:
 
-If manual recovery is needed:
+1. a lock only blocks a new deployment while it is still `in_progress`
+2. if the lock exceeds the configured timeout, the orchestrator checks the associated GitHub Actions run
+3. if the run is still active, the lock remains active and the next deployment is blocked
+4. if the run is completed or no longer active and policy allows auto recovery, the stale lock is force-released
+   through a Git-tracked commit before the new deployment continues
+5. if confidence is insufficient and policy requires run verification, the deployment stops with a clear manual-unlock
+   message instead of unlocking blindly
 
-1. inspect `config/deploy_locks.yaml`
-2. confirm the corresponding GitHub Actions run is no longer active
-3. clear or release the stale lock through a normal Git commit to `deployment-poc/main`
+Manual recovery path:
+
+1. run `.github/workflows/unlock-deployment-lock.yml` with `confirm_unlock=false`
+2. inspect the lock metadata and GitHub run state
+3. rerun the workflow with `confirm_unlock=true` only if the lock is clearly dead
 
 Do not edit the cluster directly for lock recovery.
 

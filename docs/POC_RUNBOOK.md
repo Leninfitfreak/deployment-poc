@@ -181,12 +181,41 @@ Automatic rollback is available only when enabled in `config/deployment_policy.y
 Reference:
 
 - `docs/DEPLOYMENT_STATE_AND_ROLLBACK.md`
+- `docs/STALE_LOCK_RECOVERY.md`
 
 ## Local Smoke Check Note
 
 If the Jira or config URL uses a local hostname such as `dev.leninkart.local`, direct DNS resolution may depend on the
 machine hosts-file setup. The LeninKart ingress is still reachable locally through `127.0.0.1` with the original host
 header when a runner-side smoke check is needed.
+
+## Manual Unlock Workflow
+
+If a deployment dies before releasing its lock, use the dedicated workflow:
+
+- `.github/workflows/unlock-deployment-lock.yml`
+
+Inputs:
+
+- `component`
+- `env`
+- `confirm_unlock`
+- `reason`
+
+Recommended operator flow:
+
+1. run the workflow once with `confirm_unlock=false`
+2. inspect the printed lock details, run id, run URL, age, and stale classification
+3. rerun with `confirm_unlock=true` only if the lock is clearly dead
+
+The workflow writes:
+
+- `artifacts/unlock-result.json`
+- `artifacts/unlock-result.md`
+
+Reference:
+
+- [STALE_LOCK_RECOVERY.md](/D:/Projects/Services/deployment-poc/docs/STALE_LOCK_RECOVERY.md)
 
 ## Multi-Service Validation Reference
 

@@ -80,6 +80,9 @@ The POC now includes a minimal production-style safety layer:
 - duplicate deployment prevention
 - retry-safe reconciliation handling
 - rollback-ready state history
+- stale-lock detection based on lock age plus GitHub Actions run status
+- safe auto-recovery for dead locks when policy allows it
+- explicit manual unlock workflow: `.github/workflows/unlock-deployment-lock.yml`
 - explicit rollback mode via `--rollback-to-last-success`
 - policy-driven safety toggles in `config/deployment_policy.yaml`
 
