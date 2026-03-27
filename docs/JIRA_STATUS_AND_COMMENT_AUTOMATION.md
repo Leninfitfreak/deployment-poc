@@ -227,3 +227,35 @@ Validated scenarios:
   - intentionally tested with unmatched candidate names against a fake Jira transition set
   - comment still succeeded
   - transition result was reported as `skipped_unavailable`
+
+## Stage-Wise Progress Validation
+
+The stage-wise progress layer was validated separately after the final-feedback automation was already live.
+
+- live successful deployment with progress comments: `SCRUM-19`
+  - workflow run: `23659899566`
+  - verified stages:
+    - `workflow_triggered`
+    - `jira_validated`
+    - `target_resolved`
+    - `lock_acquired`
+    - `gitops_commit_pushed`
+    - `argocd_sync_started`
+    - `argocd_synced_healthy`
+    - `post_checks_completed`
+    - `completed`
+- live no-op deployment with progress comments: `SCRUM-20`
+  - workflow run: `23660264063`
+  - verified the same readable stage sequence, with the GitOps stage explaining that no new commit was required
+- live failure deployment with progress comments: `SCRUM-21`
+  - workflow run: `23660373325`
+  - verified stages:
+    - `workflow_triggered`
+    - `jira_validated`
+    - `failed`
+  - final failure comment and Jira transition still completed successfully
+
+Cleanup after the success-path validation restored `order-service` to `v2`:
+
+- restore ticket: `SCRUM-22`
+- workflow run: `23660470657`
