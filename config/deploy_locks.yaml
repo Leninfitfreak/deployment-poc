@@ -3,20 +3,19 @@ locks:
     dev:
       app_key: frontend
       environment: dev
-      ticket: SCRUM-8
-      run_id: '23657332934'
-      run_url: https://github.com/Leninfitfreak/deployment-poc/actions/runs/23657332934
+      ticket: SIM-STALE-FRONTEND-2
+      run_id: '23655093827'
+      run_url: https://github.com/Leninfitfreak/deployment-poc/actions/runs/23655093827
       requested_version: v2
       resolved_version: '23599512080'
-      actor: Leninfitfreak
+      actor: stale-lock-simulation
       runner_name: leninkart-runner
       repository: Leninfitfreak/deployment-poc
       workflow_name: Deploy From Jira
-      acquired_at: '2026-03-27T16:45:35+00:00'
-      last_updated_at: '2026-03-27T16:45:43+00:00'
-      status: released
-      released_at: '2026-03-27T16:45:43+00:00'
-      note: already_deployed
+      acquired_at: '2026-03-26T00:00:00+00:00'
+      last_updated_at: '2026-03-26T00:00:00+00:00'
+      status: in_progress
+      note: simulated interrupted deployment for stale-lock validation rerun
   leninkart/product-service:
     dev:
       app_key: product-service
