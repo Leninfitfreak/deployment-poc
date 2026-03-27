@@ -19,14 +19,21 @@ locks:
       note: already_deployed
   leninkart/product-service:
     dev:
-      ticket: SCRUM-10
-      run_id: '23655579078'
+      app_key: product-service
+      environment: dev
+      ticket: SIM-STALE-PRODUCT
+      run_id: '23655198776'
+      run_url: https://github.com/Leninfitfreak/deployment-poc/actions/runs/23655198776
       requested_version: v2
       resolved_version: '23599512382'
-      acquired_at: '2026-03-27T16:05:04+00:00'
-      status: released
-      released_at: '2026-03-27T16:07:20+00:00'
-      note: deployed
+      actor: stale-lock-simulation
+      runner_name: leninkart-runner
+      repository: Leninfitfreak/deployment-poc
+      workflow_name: Deploy From Jira
+      acquired_at: '2026-03-26T00:00:00+00:00'
+      last_updated_at: '2026-03-26T00:00:00+00:00'
+      status: in_progress
+      note: simulated interrupted deployment for stale-lock validation
   leninkart/order-service:
     dev:
       ticket: SCRUM-12
