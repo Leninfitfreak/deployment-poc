@@ -3,26 +3,18 @@ locks:
     dev:
       app_key: frontend
       environment: dev
-      ticket: SIM-STALE-FRONTEND-2
-      run_id: '23655093827'
-      run_url: https://github.com/Leninfitfreak/deployment-poc/actions/runs/23655093827
+      ticket: SCRUM-8
+      run_id: '23657579004'
+      run_url: https://github.com/Leninfitfreak/deployment-poc/actions/runs/23657579004
       requested_version: v2
       resolved_version: '23599512080'
-      actor: stale-lock-simulation
+      actor: Leninfitfreak
       runner_name: leninkart-runner
       repository: Leninfitfreak/deployment-poc
       workflow_name: Deploy From Jira
-      acquired_at: '2026-03-26T00:00:00+00:00'
-      last_updated_at: '2026-03-27T16:51:37+00:00'
-      status: force_released
-      note: auto-recovered stale lock before SCRUM-8
-      released_at: '2026-03-27T16:51:37+00:00'
-      force_release_reason: Deployment lock is stale because workflow run 23655093827
-        is no longer active
-      force_release_actor: Leninfitfreak
-      force_release_runner: leninkart-runner
-      force_release_repository: Leninfitfreak/deployment-poc
-      force_release_ticket: SCRUM-8
+      acquired_at: '2026-03-27T16:51:41+00:00'
+      last_updated_at: '2026-03-27T16:51:41+00:00'
+      status: in_progress
   leninkart/product-service:
     dev:
       app_key: product-service
