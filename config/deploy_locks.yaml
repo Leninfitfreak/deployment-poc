@@ -11,11 +11,9 @@ locks:
       note: already_deployed
   leninkart/product-service:
     dev:
-      ticket: SCRUM-9
-      run_id: '23655477850'
-      requested_version: v1
-      resolved_version: '23599211809'
-      acquired_at: '2026-03-27T16:02:44+00:00'
-      status: released
-      released_at: '2026-03-27T16:02:53+00:00'
-      note: already_deployed
+      ticket: SCRUM-10
+      run_id: '23655579078'
+      requested_version: v2
+      resolved_version: '23599512382'
+      acquired_at: '2026-03-27T16:05:04+00:00'
+      status: in_progress
