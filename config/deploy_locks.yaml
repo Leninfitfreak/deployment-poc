@@ -21,11 +21,9 @@ locks:
       note: deployed
   leninkart/order-service:
     dev:
-      ticket: SCRUM-11
-      run_id: '23655993773'
-      requested_version: v1
-      resolved_version: '23599211965'
-      acquired_at: '2026-03-27T16:14:45+00:00'
-      status: released
-      released_at: '2026-03-27T16:14:55+00:00'
-      note: already_deployed
+      ticket: SCRUM-12
+      run_id: '23656090777'
+      requested_version: v2
+      resolved_version: '23599512459'
+      acquired_at: '2026-03-27T16:16:56+00:00'
+      status: in_progress
