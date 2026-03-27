@@ -144,3 +144,40 @@ To reuse this automation in another project:
 4. keep transition ids dynamic
 
 No code change should be needed when only the Jira workflow names differ.
+
+## LeninKart Validation Notes
+
+The current LeninKart Jira workflow was validated against real `SCRUM` tickets.
+
+Observed live transitions from freshly created deployment tickets in `To Do`:
+
+- `To Do`
+- `In Progress`
+- `In Review`
+- `Done`
+
+Chosen current policy:
+
+- success-like outcomes prefer `Done`
+- failure-like outcomes prefer `Failed`, `Blocked`, then fall back to `In Progress`
+- no-op outcomes such as `already_deployed` and `rollback_skipped` prefer `Done`
+
+Validated scenarios:
+
+- live no-op deployment: `SCRUM-15`
+  - workflow run: `23658796684`
+  - Jira transitioned from `To Do` to `Done`
+  - Jira comment posted successfully
+- live successful deployment: `SCRUM-16`
+  - workflow run: `23658905290`
+  - Jira transitioned from `To Do` to `Done`
+  - Jira comment posted successfully
+- live failure deployment: `SCRUM-18`
+  - workflow run: `23659364568`
+  - deployment failed during target resolution
+  - Jira transitioned from `To Do` to `In Progress`
+  - Jira failure comment posted successfully
+- simulated transition-unavailable path
+  - intentionally tested with unmatched candidate names against a fake Jira transition set
+  - comment still succeeded
+  - transition result was reported as `skipped_unavailable`
