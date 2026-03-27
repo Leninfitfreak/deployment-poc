@@ -4,6 +4,13 @@
 
 The deployment POC now writes deployment results back into Jira after the final deployment outcome is known.
 
+Important trigger boundary:
+
+- Jira feedback happens only after the deployment workflow starts
+- creating a Jira issue manually does not start the workflow by itself
+- the current system still requires GitHub Actions `workflow_dispatch` with the Jira ticket key
+- there is no Jira webhook or polling trigger implemented in `deployment-poc` today
+
 This feedback layer is intentionally:
 
 - config-driven

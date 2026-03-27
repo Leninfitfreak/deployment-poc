@@ -4,6 +4,13 @@
 
 - Jira ticket key only
 
+Important:
+
+- manual Jira ticket creation alone does not trigger deployment automatically
+- the current production-poc entrypoint is still manual GitHub Actions dispatch:
+  - `.github/workflows/deploy-from-jira.yml`
+- a Jira ticket must be passed into that workflow as the `jira_ticket` input before any deployment progress can appear back on the issue
+
 Example:
 
 ```text

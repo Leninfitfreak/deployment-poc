@@ -16,6 +16,12 @@ It demonstrates:
 
 Jira Ticket -> GitHub Actions -> metadata parsing -> target resolution -> GitOps update -> ArgoCD reconciliation -> result reporting
 
+Important trigger note:
+
+- creating a Jira ticket by itself does not start a deployment
+- the current system starts only when `.github/workflows/deploy-from-jira.yml` is dispatched with a Jira ticket key
+- there is currently no Jira webhook, Jira automation callback, scheduled poller, or background listener that auto-dispatches GitHub Actions on issue creation
+
 It now also closes the feedback loop back into Jira by:
 
 - discovering available Jira transitions at runtime
