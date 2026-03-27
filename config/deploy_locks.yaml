@@ -16,4 +16,6 @@ locks:
       requested_version: v2
       resolved_version: '23599512382'
       acquired_at: '2026-03-27T16:05:04+00:00'
-      status: in_progress
+      status: released
+      released_at: '2026-03-27T16:07:20+00:00'
+      note: deployed
