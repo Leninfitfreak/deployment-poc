@@ -3,13 +3,13 @@ from __future__ import annotations
 import argparse
 import json
 import os
-from datetime import datetime, timezone
 from pathlib import Path
 
 from .argocd_client import ArgoCdClient
 from .gitops_repo import GitOpsRepoManager
 from .github_client import GithubActionsClient
 from .jira_client import JiraClient, JiraIssue
+from .jira_feedback import JiraProgressReporter, apply_final_jira_feedback
 from .postchecks import run_postchecks
 from .prechecks import run_prechecks
 from .reporting import write_reports
@@ -38,158 +38,6 @@ def env_flag(name: str, default: bool = False) -> bool:
     return value.strip().lower() in {"1", "true", "yes", "on"}
 
 
-def utc_now_iso() -> str:
-    return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
-
-
-def jira_feedback_mode(result: dict) -> str:
-    action = (result.get("deployment_action") or "").strip()
-    outcome = (result.get("outcome") or "").strip()
-    if outcome == "failure" or action == "failed":
-        return "failure"
-    if action in {"already_deployed", "rollback_skipped"}:
-        return action
-    return "success"
-
-
-def build_jira_comment(result: dict) -> str:
-    mode = jira_feedback_mode(result)
-    target = result.get("target", {}) or {}
-    argocd_status = {}
-    try:
-        argocd_status = json.loads(result.get("argocd_status_json", "{}") or "{}")
-    except Exception:
-        argocd_status = {}
-
-    label = {
-        "success": "SUCCESS",
-        "failure": "FAILURE",
-        "already_deployed": "ALREADY_DEPLOYED",
-        "rollback_skipped": "ROLLBACK_SKIPPED",
-    }.get(mode, mode.upper())
-
-    lines = [
-        f"Deployment result: {label}",
-        f"Jira ticket: {result.get('jira_ticket', '')}",
-        f"Component: {target.get('app_key', '')}",
-        f"Environment: {target.get('environment', '')}",
-        f"Requested version: {target.get('requested_version', '')}",
-        f"Resolved deployable version: {target.get('resolved_version', '')}",
-        f"Deployment action: {result.get('deployment_action', '')}",
-    ]
-    if result.get("gitops_commit"):
-        lines.append(f"GitOps commit SHA: {result.get('gitops_commit', '')}")
-    if result.get("changed_file"):
-        lines.append(f"GitOps file: {result.get('changed_file', '')}")
-    if target.get("argocd_app"):
-        lines.append(f"ArgoCD application: {target.get('argocd_app', '')}")
-    if argocd_status:
-        lines.append(f"Final Sync status: {argocd_status.get('sync', '')}")
-        lines.append(f"Final Health status: {argocd_status.get('health', '')}")
-        lines.append(f"Observed revision: {argocd_status.get('revision', '')}")
-    if result.get("workflow_run_url"):
-        lines.append(f"Workflow run URL: {result.get('workflow_run_url', '')}")
-    if result.get("error"):
-        lines.append(f"Error summary: {result.get('error', '')}")
-    if mode == "already_deployed":
-        lines.append("No new GitOps deployment was needed because the requested version was already active and verified.")
-    if mode == "rollback_skipped":
-        lines.append("Rollback request did not create a new deployment because the last successful version was already active and verified.")
-    lines.append(f"Timestamp: {utc_now_iso()}")
-    return "\n".join(line for line in lines if str(line).strip())
-
-
-def apply_jira_feedback(jira: JiraClient | None, issue: JiraIssue | None, result: dict, global_config: dict) -> dict:
-    config = (global_config or {}).get("jira_feedback", {}) or {}
-    feedback = {
-        "enabled": bool(config.get("enabled", False)),
-        "mode": jira_feedback_mode(result),
-        "jira_comment_added": False,
-        "jira_transition_attempted": False,
-        "jira_transition_result": "skipped",
-        "jira_transition_name_used": "",
-        "jira_feedback_error": "",
-        "current_status": "",
-        "final_status": "",
-        "available_transitions": [],
-        "comment_attempted": False,
-        "comment_result": "skipped",
-        "policy_requires_transition_success": bool(config.get("require_transition_success", False)),
-        "policy_satisfied": True,
-    }
-    if not feedback["enabled"]:
-        feedback["jira_feedback_error"] = "Jira feedback disabled by config"
-        return feedback
-    if not jira:
-        feedback["jira_feedback_error"] = "Jira client unavailable for feedback"
-        return feedback
-    if not issue:
-        feedback["jira_feedback_error"] = "Jira issue details unavailable for feedback"
-        return feedback
-
-    transition_candidates = (config.get("transition_name_candidates", {}) or {}).get(feedback["mode"], []) or []
-    comment_policy = config.get("comment_on", {}) or {}
-    should_comment = (
-        comment_policy.get("failure", True)
-        if feedback["mode"] == "failure"
-        else comment_policy.get("noop", True)
-        if feedback["mode"] in {"already_deployed", "rollback_skipped"}
-        else comment_policy.get("success", True)
-    )
-
-    try:
-        current_issue, transition, transitions = jira.resolve_transition(issue.key, transition_candidates)
-        feedback["current_status"] = current_issue.status_name
-        feedback["available_transitions"] = [
-            {
-                "id": item.id,
-                "name": item.name,
-                "to_status_name": item.to_status_name,
-            }
-            for item in transitions
-        ]
-        normalized_candidates = {name.strip().casefold(): name for name in transition_candidates if str(name).strip()}
-        if current_issue.status_name.strip().casefold() in normalized_candidates:
-            feedback["jira_transition_result"] = "skipped_already_in_target_status"
-            feedback["jira_transition_name_used"] = normalized_candidates[current_issue.status_name.strip().casefold()]
-            feedback["final_status"] = current_issue.status_name
-        elif transition:
-            feedback["jira_transition_attempted"] = True
-            feedback["jira_transition_name_used"] = transition.name or transition.to_status_name
-            jira.transition_issue(issue.key, transition.id)
-            refreshed = jira.fetch_issue(issue.key)
-            feedback["jira_transition_result"] = "success"
-            feedback["final_status"] = refreshed.status_name
-        else:
-            feedback["jira_transition_result"] = "skipped_unavailable"
-            feedback["jira_feedback_error"] = (
-                f"No configured Jira transition is available from status '{current_issue.status_name}' "
-                f"for mode '{feedback['mode']}'"
-            )
-            feedback["final_status"] = current_issue.status_name
-    except Exception as exc:
-        feedback["jira_transition_result"] = "failure"
-        feedback["jira_feedback_error"] = str(exc)
-
-    if should_comment:
-        feedback["comment_attempted"] = True
-        try:
-            jira.add_comment(issue.key, build_jira_comment(result))
-            feedback["jira_comment_added"] = True
-            feedback["comment_result"] = "success"
-        except Exception as exc:
-            feedback["comment_result"] = "failure"
-            if feedback["jira_feedback_error"]:
-                feedback["jira_feedback_error"] = f"{feedback['jira_feedback_error']}; comment failed: {exc}"
-            else:
-                feedback["jira_feedback_error"] = f"comment failed: {exc}"
-    feedback["policy_satisfied"] = (
-        feedback["jira_transition_result"] in {"success", "skipped_already_in_target_status", "skipped"}
-        and feedback["comment_result"] in {"success", "skipped"}
-    )
-    return feedback
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(description="Jira-driven GitOps deployment POC")
     parser.add_argument("--jira-ticket", required=True)
@@ -205,19 +53,49 @@ def main() -> int:
     jira: JiraClient | None = None
     issue: JiraIssue | None = None
     jira_feedback_result: dict = {}
+    jira_progress_reporter: JiraProgressReporter | None = None
     try:
         run_id = os.environ.get("GITHUB_RUN_ID", "local-run")
+        workflow_name = os.environ.get("GITHUB_WORKFLOW", "Deploy From Jira")
+        actor = os.environ.get("GITHUB_ACTOR", "")
+        repository = os.environ.get("GITHUB_REPOSITORY", "")
+        run_url = (
+            f"{os.environ.get('GITHUB_SERVER_URL', 'https://github.com').rstrip('/')}/{repository}/actions/runs/{run_id}"
+            if repository and run_id not in {"", "local-run"}
+            else ""
+        )
         jira = JiraClient(
             os.environ["JIRA_BASE_URL"],
             os.environ["JIRA_EMAIL"],
             os.environ["JIRA_API_TOKEN"],
         )
         issue = jira.fetch_issue(args.jira_ticket)
+        jira_progress_reporter = JiraProgressReporter(jira, issue, configs["global"], run_url=run_url)
+        jira_progress_reporter.publish_stage(
+            "workflow_triggered",
+            {"detail": "Deployment workflow accepted the Jira ticket and started processing."},
+        )
         metadata = parse_ticket_description(issue.description, configs["jira_field_mapping"])
         validate_metadata(metadata, configs["global"], configs["environments"], configs["jira_field_mapping"])
+        jira_progress_reporter.publish_stage(
+            "jira_validated",
+            {
+                "requested_version": metadata.get("version", ""),
+                "detail": "Jira metadata parsed and validated successfully.",
+            },
+        )
         target = resolve_target(metadata, configs["projects"], configs["app_mapping"], configs["environments"])
         validate_target(target)
         validate_version_resolution(target)
+        jira_progress_reporter.publish_stage(
+            "target_resolved",
+            {
+                "target": target,
+                "requested_version": target.get("requested_version", ""),
+                "resolved_version": target.get("resolved_version", ""),
+                "detail": "Resolved the GitOps path and ArgoCD application for the request.",
+            },
+        )
         test_mode = args.test_mode or env_flag("TEST_MODE")
         if args.rollback_to_last_success and not read_yaml(root / "config" / "deployment_policy.yaml").get("policy", {}).get("manual_rollback_enabled", True):
             raise PocError("Manual rollback is disabled by deployment_policy.yaml")
@@ -249,14 +127,7 @@ def main() -> int:
         desired_version = target["resolved_version"]
         requested_version = target["requested_version"]
         rollback_source_version = ""
-        workflow_name = os.environ.get("GITHUB_WORKFLOW", "Deploy From Jira")
-        actor = os.environ.get("GITHUB_ACTOR", "")
         repository = os.environ.get("GITHUB_REPOSITORY", github_client.repository if github_client else "")
-        run_url = (
-            f"{os.environ.get('GITHUB_SERVER_URL', 'https://github.com').rstrip('/')}/{repository}/actions/runs/{run_id}"
-            if repository and run_id not in {"", "local-run"}
-            else ""
-        )
 
         if args.rollback_to_last_success:
             rollback_version = previous_state.get("last_version", "").strip()
@@ -280,6 +151,15 @@ def main() -> int:
             repository=repository,
             workflow_name=workflow_name,
             run_url=run_url,
+        )
+        jira_progress_reporter.publish_stage(
+            "lock_acquired",
+            {
+                "target": target,
+                "requested_version": requested_version,
+                "resolved_version": desired_version,
+                "detail": "Deployment lock acquired successfully.",
+            },
         )
 
         argocd_status = None
@@ -305,6 +185,16 @@ def main() -> int:
             )
 
             if current_tag == desired_version:
+                jira_progress_reporter.publish_stage(
+                    "gitops_commit_pushed",
+                    {
+                        "target": target,
+                        "requested_version": requested_version,
+                        "resolved_version": desired_version,
+                        "gitops_commit": current_revision,
+                        "detail": "No new GitOps commit was needed; verifying the current deployed revision.",
+                    },
+                )
                 if test_mode:
                     deployment_action = "reconciled"
                     gitops_commit = current_revision
@@ -316,7 +206,23 @@ def main() -> int:
                         "operation_phase": "Succeeded",
                         "raw": {"simulated": True},
                     }
+                    jira_progress_reporter.publish_stage(
+                        "argocd_sync_started",
+                        {
+                            "target": target,
+                            "gitops_commit": gitops_commit,
+                            "detail": "Test mode reconciliation started against the simulated ArgoCD state.",
+                        },
+                    )
                 elif argocd.configured():
+                    jira_progress_reporter.publish_stage(
+                        "argocd_sync_started",
+                        {
+                            "target": target,
+                            "gitops_commit": current_revision,
+                            "detail": "Waiting for ArgoCD to verify the current revision.",
+                        },
+                    )
                     if args.trigger_argocd_sync:
                         argocd.sync_app(target["argocd_app"])
                     argocd_status = argocd.wait_until_synced_and_healthy(
@@ -350,6 +256,16 @@ def main() -> int:
                     git_email,
                     test_mode=test_mode,
                 )
+                jira_progress_reporter.publish_stage(
+                    "gitops_commit_pushed",
+                    {
+                        "target": target,
+                        "requested_version": requested_version,
+                        "resolved_version": desired_version,
+                        "gitops_commit": gitops_commit,
+                        "detail": "GitOps values file was updated and pushed successfully.",
+                    },
+                )
                 try:
                     if test_mode:
                         argocd_status = {
@@ -360,7 +276,23 @@ def main() -> int:
                             "operation_phase": "Succeeded",
                             "raw": {"simulated": True},
                         }
+                        jira_progress_reporter.publish_stage(
+                            "argocd_sync_started",
+                            {
+                                "target": target,
+                                "gitops_commit": gitops_commit,
+                                "detail": "Test mode reconciliation started against the simulated ArgoCD state.",
+                            },
+                        )
                     elif argocd.configured():
+                        jira_progress_reporter.publish_stage(
+                            "argocd_sync_started",
+                            {
+                                "target": target,
+                                "gitops_commit": gitops_commit,
+                                "detail": "GitOps commit pushed. Waiting for ArgoCD to reconcile it.",
+                            },
+                        )
                         if args.trigger_argocd_sync:
                             argocd.sync_app(target["argocd_app"])
                         argocd_status = argocd.wait_until_synced_and_healthy(
@@ -407,7 +339,23 @@ def main() -> int:
                         }
                     raise deploy_error
 
+        jira_progress_reporter.publish_stage(
+            "argocd_synced_healthy",
+            {
+                "target": target,
+                "gitops_commit": gitops_commit,
+                "detail": "ArgoCD reported the expected revision as Synced and Healthy.",
+            },
+        )
         postchecks = run_postchecks(target, argocd_status)
+        jira_progress_reporter.publish_stage(
+            "post_checks_completed",
+            {
+                "target": target,
+                "gitops_commit": gitops_commit,
+                "detail": "Post-deployment checks completed.",
+            },
+        )
         target["effective_version"] = desired_version
         if rollback_source_version and deployment_action in {"rolled_back", "rollback_skipped", "rollback_test_mode"}:
             target["rollback_source_version"] = rollback_source_version
@@ -448,8 +396,20 @@ def main() -> int:
             "state_json": json.dumps(state_result, indent=2),
             "rollback_json": json.dumps(rollback_result, indent=2),
             "postchecks_json": json.dumps(postchecks, indent=2),
+            "jira_progress_json": "{}",
         }
-        jira_feedback_result = apply_jira_feedback(jira, issue, result, configs["global"])
+        jira_progress_reporter.publish_stage(
+            "completed",
+            {
+                "target": target,
+                "requested_version": requested_version,
+                "resolved_version": desired_version,
+                "gitops_commit": gitops_commit,
+                "detail": f"Deployment flow completed with action '{deployment_action}'.",
+            },
+        )
+        result["jira_progress_json"] = json.dumps(jira_progress_reporter.summary(), indent=2)
+        jira_feedback_result = apply_final_jira_feedback(jira, issue, result, configs["global"])
         result["jira_feedback_json"] = json.dumps(jira_feedback_result, indent=2)
         write_reports(root, result)
         print(json.dumps(result, indent=2))
@@ -487,6 +447,7 @@ def main() -> int:
             "state_json": json.dumps(failure_state, indent=2),
             "rollback_json": json.dumps(failure_rollback, indent=2),
             "postchecks_json": "{}",
+            "jira_progress_json": "{}",
             "jira_feedback_json": "{}",
             "target": {
                 "project_key": "",
@@ -501,9 +462,20 @@ def main() -> int:
             },
         }
         try:
-            jira_feedback_result = apply_jira_feedback(jira, issue, result, configs["global"])
+            if jira_progress_reporter:
+                jira_progress_reporter.publish_stage(
+                    "failed",
+                    {
+                        "target": result.get("target", {}),
+                        "detail": str(exc),
+                    },
+                )
+                result["jira_progress_json"] = json.dumps(jira_progress_reporter.summary(), indent=2)
+            jira_feedback_result = apply_final_jira_feedback(jira, issue, result, configs["global"])
             result["jira_feedback_json"] = json.dumps(jira_feedback_result, indent=2)
         except Exception as jira_feedback_exc:
+            if jira_progress_reporter:
+                result["jira_progress_json"] = json.dumps(jira_progress_reporter.summary(), indent=2)
             result["jira_feedback_json"] = json.dumps(
                 {
                     "enabled": bool(configs.get("global", {}).get("jira_feedback", {}).get("enabled", False)),

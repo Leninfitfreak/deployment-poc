@@ -65,6 +65,10 @@ def write_reports(root: Path, result: dict) -> None:
         jira_feedback = json.loads(result.get("jira_feedback_json", "{}") or "{}")
     except Exception:
         jira_feedback = {}
+    try:
+        jira_progress = json.loads(result.get("jira_progress_json", "{}") or "{}")
+    except Exception:
+        jira_progress = {}
     if jira_feedback:
         markdown.extend(
             [
@@ -78,6 +82,12 @@ def write_reports(root: Path, result: dict) -> None:
         )
         if jira_feedback.get("jira_feedback_error"):
             markdown.append(f"- Jira feedback warning: `{jira_feedback.get('jira_feedback_error', '')}`")
+    if jira_progress:
+        posted = jira_progress.get("posted_stages", []) or []
+        markdown.append(f"- Jira progress comments attempted: `{len(posted)}`")
+        errors = jira_progress.get("errors", []) or []
+        if errors:
+            markdown.append(f"- Jira progress warning count: `{len(errors)}`")
 
     if result.get("error"):
         markdown.extend(["", "## Error", "", f"`{result['error']}`"])
@@ -108,6 +118,10 @@ def write_reports(root: Path, result: dict) -> None:
             "## Post-checks",
             "",
             f"```json\n{result.get('postchecks_json', '{}')}\n```",
+            "",
+            "## Jira Progress",
+            "",
+            f"```json\n{result.get('jira_progress_json', '{}')}\n```",
             "",
             "## Jira Feedback",
             "",

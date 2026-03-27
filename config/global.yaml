@@ -11,6 +11,19 @@ default_runner_labels:
   - dev
 jira_feedback:
   enabled: true
+  progress_comments:
+    enabled: true
+    stages:
+      - workflow_triggered
+      - jira_validated
+      - target_resolved
+      - lock_acquired
+      - gitops_commit_pushed
+      - argocd_sync_started
+      - argocd_synced_healthy
+      - post_checks_completed
+      - completed
+      - failed
   transition_name_candidates:
     success:
       - Done

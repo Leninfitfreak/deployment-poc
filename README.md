@@ -19,6 +19,7 @@ Jira Ticket -> GitHub Actions -> metadata parsing -> target resolution -> GitOps
 It now also closes the feedback loop back into Jira by:
 
 - discovering available Jira transitions at runtime
+- posting concise progress comments at major deployment stages
 - transitioning the deployment ticket by configured transition name candidates
 - adding a deployment result comment for success, failure, and no-op outcomes
 
@@ -79,6 +80,7 @@ To adapt this POC to another project, update only:
 
 The Jira feedback behavior is also config-driven through `config/global.yaml`, including:
 
+- which progress stages post Jira comments
 - success transition candidates
 - failure transition candidates
 - no-op transition candidates
@@ -138,6 +140,7 @@ After the final deployment result is known, the orchestrator now performs a best
 
 Behavior:
 
+- progress comments are posted at meaningful deployment stages such as workflow start, target resolution, lock acquisition, GitOps push, ArgoCD verification, and completion
 - `deployed`, `reconciled`, `rolled_back`, and other successful outcomes
   - try a configured success transition
   - add a success comment
@@ -150,6 +153,7 @@ Behavior:
 
 Safety rules:
 
+- progress comments are concise and stage-based to avoid noisy per-step spam
 - transition ids are never hardcoded
 - Jira transitions are resolved dynamically from the issue's live available transitions
 - if no matching transition is available, the deployment result is still preserved and the workflow records a Jira warning

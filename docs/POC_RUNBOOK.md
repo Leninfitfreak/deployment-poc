@@ -76,6 +76,8 @@ Configured in:
 
 Current policy shape:
 
+- `jira_feedback.progress_comments.enabled`
+- `jira_feedback.progress_comments.stages`
 - `jira_feedback.transition_name_candidates.success`
 - `jira_feedback.transition_name_candidates.failure`
 - `jira_feedback.transition_name_candidates.already_deployed`
@@ -86,14 +88,16 @@ Current policy shape:
 
 Important behavior:
 
-1. the system discovers live available transitions for the Jira issue before attempting a status change
-2. transitions are matched by configured names or target status names, never by hardcoded transition ids
-3. if the ticket is already in the desired target status, transition is skipped cleanly
-4. if no configured transition is available from the current state, the system still attempts the Jira comment and records a warning
-5. if deployment succeeded but Jira feedback failed, the deployment remains successful and the Jira feedback issue is reported separately
+1. the system posts concise progress comments at major stage boundaries while the workflow is still running
+2. the system discovers live available transitions for the Jira issue before attempting a final status change
+3. transitions are matched by configured names or target status names, never by hardcoded transition ids
+4. if the ticket is already in the desired target status, transition is skipped cleanly
+5. if no configured transition is available from the current state, the system still attempts the Jira comment and records a warning
+6. if deployment succeeded but Jira feedback failed, the deployment remains successful and the Jira feedback issue is reported separately
 
 Comment content includes:
 
+- stage progress markers such as `workflow_triggered`, `target_resolved`, `gitops_commit_pushed`, and `argocd_synced_healthy`
 - deployment result
 - Jira ticket
 - component

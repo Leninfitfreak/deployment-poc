@@ -23,6 +23,8 @@ Jira feedback policy is defined in:
 Current keys:
 
 - `jira_feedback.enabled`
+- `jira_feedback.progress_comments.enabled`
+- `jira_feedback.progress_comments.stages`
 - `jira_feedback.transition_name_candidates.success`
 - `jira_feedback.transition_name_candidates.failure`
 - `jira_feedback.transition_name_candidates.already_deployed`
@@ -33,6 +35,41 @@ Current keys:
 - `jira_feedback.require_transition_success`
 
 These values are reusable and can be changed for another Jira workflow without changing the deployment logic.
+
+## Progress Comments
+
+The deployment POC now posts stage-wise progress comments while the workflow is still running.
+
+Current configured stages:
+
+- `workflow_triggered`
+- `jira_validated`
+- `target_resolved`
+- `lock_acquired`
+- `gitops_commit_pushed`
+- `argocd_sync_started`
+- `argocd_synced_healthy`
+- `post_checks_completed`
+- `completed`
+- `failed`
+
+These progress comments are intentionally short. They tell Jira users where the deployment is in the lifecycle without
+duplicating the full final summary on every step.
+
+Typical progress comment fields:
+
+- stage name
+- Jira ticket
+- component
+- environment
+- requested or resolved version when known
+- GitOps commit when available
+- ArgoCD application when available
+- workflow run URL
+- short detail line
+
+No-op flows such as `already_deployed` still post meaningful progress, but the GitOps stage explains that no new commit
+was required and the workflow is verifying the current revision instead.
 
 ## How Transition Lookup Works
 
@@ -76,6 +113,12 @@ Current deployment outcomes are mapped as follows:
 ## Comment Format
 
 Each Jira comment includes operator-friendly deployment context.
+
+Progress comments:
+
+- are stage markers while the workflow is still running
+- are concise
+- help operators follow the deployment lifecycle in near real time
 
 Success comment fields:
 
@@ -166,15 +209,18 @@ Validated scenarios:
 
 - live no-op deployment: `SCRUM-15`
   - workflow run: `23658796684`
+  - progress comments were posted through the no-op path
   - Jira transitioned from `To Do` to `Done`
   - Jira comment posted successfully
 - live successful deployment: `SCRUM-16`
   - workflow run: `23658905290`
+  - progress comments were posted through GitOps push and ArgoCD verification
   - Jira transitioned from `To Do` to `Done`
   - Jira comment posted successfully
 - live failure deployment: `SCRUM-18`
   - workflow run: `23659364568`
   - deployment failed during target resolution
+  - progress stopped at failure and the `failed` stage comment was posted
   - Jira transitioned from `To Do` to `In Progress`
   - Jira failure comment posted successfully
 - simulated transition-unavailable path
