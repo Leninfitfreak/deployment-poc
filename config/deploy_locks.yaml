@@ -13,9 +13,16 @@ locks:
       repository: Leninfitfreak/deployment-poc
       workflow_name: Deploy From Jira
       acquired_at: '2026-03-26T00:00:00+00:00'
-      last_updated_at: '2026-03-26T00:00:00+00:00'
-      status: in_progress
-      note: simulated interrupted deployment for stale-lock validation
+      last_updated_at: '2026-03-27T16:45:32+00:00'
+      status: force_released
+      note: auto-recovered stale lock before SCRUM-8
+      released_at: '2026-03-27T16:45:32+00:00'
+      force_release_reason: Deployment lock is stale because workflow run 23655093827
+        is no longer active
+      force_release_actor: Leninfitfreak
+      force_release_runner: leninkart-runner
+      force_release_repository: Leninfitfreak/deployment-poc
+      force_release_ticket: SCRUM-8
   leninkart/product-service:
     dev:
       ticket: SCRUM-10
