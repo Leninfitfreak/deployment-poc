@@ -29,12 +29,16 @@ def write_reports(root: Path, result: dict) -> None:
     except Exception:
         lock_payload = {}
     if lock_payload:
-        previous = lock_payload.get("previous_lock_evaluation", {}) or {}
-        stale_recovery = lock_payload.get("stale_recovery", {}) or {}
+        acquire_payload = lock_payload.get("acquire", {}) or {}
+        release_payload = lock_payload.get("release", {}) or {}
+        previous = acquire_payload.get("previous_lock_evaluation", {}) or {}
+        stale_recovery = acquire_payload.get("stale_recovery", {}) or {}
         if previous:
             markdown.append(f"- Previous lock classification: `{previous.get('classification', '')}`")
         if stale_recovery:
             markdown.append(f"- Stale lock recovery commit: `{stale_recovery.get('commit', '')}`")
+        if release_payload:
+            markdown.append(f"- Final lock status: `{release_payload.get('entry', {}).get('status', '')}`")
 
     target = result.get("target", {})
     if target:

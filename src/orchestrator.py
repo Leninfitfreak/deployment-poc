@@ -83,7 +83,9 @@ def main() -> int:
         )
         previous_state = state_manager.get_last_successful_state(target)
         target["previous_version"] = previous_state.get("last_version", "")
-        lock_result = state_result = {}
+        lock_acquire_result = {}
+        lock_release_result = {}
+        state_result = {}
         rollback_result = {}
         deployment_action = "deploy"
         current_tag = ""
@@ -111,7 +113,7 @@ def main() -> int:
             requested_version = rollback_version
             deployment_action = "rollback_requested"
 
-        lock_result = state_manager.acquire_lock(
+        lock_acquire_result = state_manager.acquire_lock(
             target,
             issue.key,
             run_id,
@@ -264,7 +266,7 @@ def main() -> int:
             action=deployment_action,
             rollback_source_version=rollback_source_version if deployment_action in {"rolled_back", "rollback_skipped", "rollback_test_mode"} else "",
         )
-        lock_result = state_manager.release_lock(target, issue.key, "released", deployment_action)
+        lock_release_result = state_manager.release_lock(target, issue.key, "released", deployment_action)
         result = {
             "jira_ticket": issue.key,
             "issue_summary": issue.summary,
@@ -280,7 +282,13 @@ def main() -> int:
             "outcome": "success",
             "prechecks_json": json.dumps(prechecks, indent=2),
             "argocd_status_json": json.dumps(argocd_status or {}, indent=2),
-            "lock_json": json.dumps(lock_result, indent=2),
+            "lock_json": json.dumps(
+                {
+                    "acquire": lock_acquire_result,
+                    "release": lock_release_result,
+                },
+                indent=2,
+            ),
             "state_json": json.dumps(state_result, indent=2),
             "rollback_json": json.dumps(rollback_result, indent=2),
             "postchecks_json": json.dumps(postchecks, indent=2),
@@ -311,7 +319,13 @@ def main() -> int:
             "workflow_run_url": locals().get("run_url", ""),
             "prechecks_json": "{}",
             "argocd_status_json": "{}",
-            "lock_json": json.dumps(failure_lock, indent=2),
+            "lock_json": json.dumps(
+                {
+                    "acquire": locals().get("lock_acquire_result", {}),
+                    "release": failure_lock,
+                },
+                indent=2,
+            ),
             "state_json": json.dumps(failure_state, indent=2),
             "rollback_json": json.dumps(failure_rollback, indent=2),
             "postchecks_json": "{}",
