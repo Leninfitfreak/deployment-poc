@@ -39,9 +39,9 @@ deployments:
       last_ticket: SCRUM-11
       last_argocd_app: dev-order-service
       last_changed_file: applications/order-service/helm/values-dev.yaml
-      last_deployed_at: '2026-03-27T16:13:33+00:00'
+      last_deployed_at: '2026-03-27T16:14:52+00:00'
       last_status: success
-      last_action: deployed
+      last_action: already_deployed
       last_sync_status: Synced
       last_health_status: Healthy
       previous_successful_version: null
