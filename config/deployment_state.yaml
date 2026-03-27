@@ -33,17 +33,17 @@ deployments:
       rollback_source_version: null
   leninkart/order-service:
     dev:
-      last_version: '23599211965'
-      last_requested_version: v1
-      last_gitops_commit: f76465690599c855bff48de07f79f9b05e23e3e8
-      last_ticket: SCRUM-11
+      last_version: '23599512459'
+      last_requested_version: v2
+      last_gitops_commit: 4442f25bbd7de543abf59ca9e32c7f358232f938
+      last_ticket: SCRUM-12
       last_argocd_app: dev-order-service
       last_changed_file: applications/order-service/helm/values-dev.yaml
-      last_deployed_at: '2026-03-27T16:14:52+00:00'
+      last_deployed_at: '2026-03-27T16:22:08+00:00'
       last_status: success
-      last_action: already_deployed
+      last_action: deployed
       last_sync_status: Synced
       last_health_status: Healthy
-      previous_successful_version: null
-      previous_successful_gitops_commit: null
+      previous_successful_version: '23599211965'
+      previous_successful_gitops_commit: f76465690599c855bff48de07f79f9b05e23e3e8
       rollback_source_version: null
