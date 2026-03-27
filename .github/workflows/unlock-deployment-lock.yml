@@ -1,0 +1,82 @@
+name: Unlock Deployment Lock
+
+on:
+  workflow_dispatch:
+    inputs:
+      component:
+        description: Target component/app, for example frontend or product-service
+        required: true
+        type: string
+      env:
+        description: Deployment environment
+        required: true
+        default: dev
+        type: string
+      confirm_unlock:
+        description: Set true to force-release the inspected lock
+        required: true
+        default: false
+        type: boolean
+      reason:
+        description: Optional operator reason for the unlock
+        required: false
+        default: manual stale lock recovery
+        type: string
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  unlock:
+    runs-on:
+      - self-hosted
+      - Windows
+      - X64
+      - leninkart
+      - local
+      - dev
+    env:
+      RUNNER_PYTHON_DIR: C:\actions-runner\tools\python313
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure self-hosted Python path
+        shell: cmd
+        run: |
+          if not exist "%RUNNER_PYTHON_DIR%\python.exe" (
+            echo Python not found at %RUNNER_PYTHON_DIR%\python.exe
+            exit /b 1
+          )
+          echo %RUNNER_PYTHON_DIR%>> "%GITHUB_PATH%"
+
+      - name: Install dependencies
+        shell: cmd
+        run: python -m pip install -r requirements.txt
+
+      - name: Inspect or unlock deployment lock
+        shell: cmd
+        env:
+          GITHUB_API_TOKEN: ${{ github.token }}
+          DEPLOY_GIT_USER: deployment-poc[bot]
+          DEPLOY_GIT_EMAIL: deployment-poc@users.noreply.github.com
+          RUNNER_NAME: ${{ runner.name }}
+        run: python -m src.unlock_lock --component "${{ inputs.component }}" --env "${{ inputs.env }}" ${{ inputs.confirm_unlock && '--confirm-unlock' || '' }} --reason "${{ inputs.reason }}"
+
+      - name: Print unlock result
+        if: always()
+        shell: cmd
+        run: |
+          if exist artifacts\unlock-result.json (
+            python -c "import json, pathlib; data=json.loads(pathlib.Path('artifacts/unlock-result.json').read_text()); print('outcome=', data.get('outcome')); print('component=', data.get('target', {}).get('app_key')); print('environment=', data.get('target', {}).get('environment')); print('confirm_unlock=', data.get('confirm_unlock')); print('reason=', data.get('reason')); print('lock_inspection=', data.get('lock_inspection_json')); print('unlock=', data.get('unlock_json')); print('error=', data.get('error'))"
+          ) else (
+            echo unlock-result.json not found
+            exit /b 1
+          )
+
+      - name: Upload unlock artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unlock-result
+          path: artifacts/

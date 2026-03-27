@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from .utils import write_json
@@ -19,7 +20,21 @@ def write_reports(root: Path, result: dict) -> None:
         f"- GitOps commit: `{result.get('gitops_commit', '')}`",
         f"- Changed file: `{result.get('changed_file', '')}`",
         f"- Runner: `{result.get('runner_name', '')}`",
+        f"- Workflow run id: `{result.get('workflow_run_id', '')}`",
+        f"- Workflow run url: `{result.get('workflow_run_url', '')}`",
     ]
+
+    try:
+        lock_payload = json.loads(result.get("lock_json", "{}") or "{}")
+    except Exception:
+        lock_payload = {}
+    if lock_payload:
+        previous = lock_payload.get("previous_lock_evaluation", {}) or {}
+        stale_recovery = lock_payload.get("stale_recovery", {}) or {}
+        if previous:
+            markdown.append(f"- Previous lock classification: `{previous.get('classification', '')}`")
+        if stale_recovery:
+            markdown.append(f"- Stale lock recovery commit: `{stale_recovery.get('commit', '')}`")
 
     target = result.get("target", {})
     if target:

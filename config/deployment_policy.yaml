@@ -1,5 +1,9 @@
 policy:
   lock_timeout_minutes: 30
+  stale_lock_check_enabled: true
+  auto_release_stale_locks: true
+  allow_force_unlock: true
+  unlock_requires_run_check: true
   auto_rollback_enabled: false
   allow_duplicate_deployments: false
   url_fallback_warning_enabled: true

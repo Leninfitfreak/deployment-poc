@@ -52,6 +52,46 @@ def embed_token_in_https_url(url: str, token: str) -> str:
     return urlunparse((parsed.scheme, netloc, parsed.path, parsed.params, parsed.query, parsed.fragment))
 
 
+def git_remote_url(repo_root: Path, remote_name: str = "origin") -> str:
+    return run(["git", "remote", "get-url", remote_name], cwd=repo_root)
+
+
+def github_repo_slug(repo_root: Path, remote_name: str = "origin") -> str:
+    remote_url = git_remote_url(repo_root, remote_name)
+    parsed = urlparse(remote_url)
+    if parsed.scheme in {"http", "https"}:
+        path = parsed.path.lstrip("/")
+    elif parsed.scheme == "" and ":" in remote_url and "@" in remote_url:
+        path = remote_url.split(":", 1)[1]
+    else:
+        raise PocError(f"Unsupported git remote format for GitHub repo slug resolution: {remote_url}")
+    if path.endswith(".git"):
+        path = path[:-4]
+    if not path or "/" not in path:
+        raise PocError(f"Unable to derive GitHub repository slug from remote URL: {remote_url}")
+    return path
+
+
+def git_credential_fill(host: str = "github.com") -> dict[str, str]:
+    completed = subprocess.run(
+        ["git", "credential", "fill"],
+        input=f"protocol=https\nhost={host}\n\n",
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if completed.returncode != 0:
+        return {}
+    payload: dict[str, str] = {}
+    for raw_line in completed.stdout.splitlines():
+        line = raw_line.strip()
+        if "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        payload[key.strip()] = value.strip()
+    return payload
+
+
 def run(command: list[str], *, cwd: Path | None = None) -> str:
     completed = subprocess.run(
         command,

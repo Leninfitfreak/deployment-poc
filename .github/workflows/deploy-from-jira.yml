@@ -25,6 +25,7 @@ on:
 
 permissions:
   contents: write
+  actions: read
 
 jobs:
   deploy:
@@ -83,6 +84,7 @@ jobs:
           INFRA_PAT: ${{ secrets.INFRA_PAT }}
           ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
           ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
+          GITHUB_API_TOKEN: ${{ github.token }}
           ARGOCD_INSECURE: "true"
           DEPLOY_GIT_USER: deployment-poc[bot]
           DEPLOY_GIT_EMAIL: deployment-poc@users.noreply.github.com

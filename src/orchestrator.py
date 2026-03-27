@@ -7,6 +7,7 @@ from pathlib import Path
 
 from .argocd_client import ArgoCdClient
 from .gitops_repo import GitOpsRepoManager
+from .github_client import GithubActionsClient
 from .jira_client import JiraClient
 from .postchecks import run_postchecks
 from .prechecks import run_prechecks
@@ -25,6 +26,7 @@ def load_configs(root: Path) -> dict:
         "environments": read_yaml(config_dir / "environments.yaml"),
         "jira_field_mapping": read_yaml(config_dir / "jira_field_mapping.yaml"),
         "global": read_yaml(config_dir / "global.yaml"),
+        "policy": read_yaml(config_dir / "deployment_policy.yaml"),
     }
 
 
@@ -66,8 +68,13 @@ def main() -> int:
         target["previous_version"] = ""
         git_user = os.environ.get("DEPLOY_GIT_USER", "deployment-poc[bot]")
         git_email = os.environ.get("DEPLOY_GIT_EMAIL", "deployment-poc@users.noreply.github.com")
-        policy = read_yaml(root / "config" / "deployment_policy.yaml")
-        state_manager = DeploymentStateManager(root, policy, git_user, git_email, test_mode)
+        policy = configs["policy"]
+        github_client = GithubActionsClient(
+            root,
+            repository=os.environ.get("GITHUB_REPOSITORY"),
+            api_token=os.environ.get("GITHUB_API_TOKEN"),
+        )
+        state_manager = DeploymentStateManager(root, policy, git_user, git_email, github_client, test_mode)
 
         argocd = ArgoCdClient(
             os.environ.get("ARGOCD_SERVER"),
@@ -84,6 +91,14 @@ def main() -> int:
         desired_version = target["resolved_version"]
         requested_version = target["requested_version"]
         rollback_source_version = ""
+        workflow_name = os.environ.get("GITHUB_WORKFLOW", "Deploy From Jira")
+        actor = os.environ.get("GITHUB_ACTOR", "")
+        repository = os.environ.get("GITHUB_REPOSITORY", github_client.repository if github_client else "")
+        run_url = (
+            f"{os.environ.get('GITHUB_SERVER_URL', 'https://github.com').rstrip('/')}/{repository}/actions/runs/{run_id}"
+            if repository and run_id not in {"", "local-run"}
+            else ""
+        )
 
         if args.rollback_to_last_success:
             rollback_version = previous_state.get("last_version", "").strip()
@@ -96,7 +111,18 @@ def main() -> int:
             requested_version = rollback_version
             deployment_action = "rollback_requested"
 
-        lock_result = state_manager.acquire_lock(target, issue.key, run_id, requested_version, desired_version)
+        lock_result = state_manager.acquire_lock(
+            target,
+            issue.key,
+            run_id,
+            requested_version,
+            desired_version,
+            actor=actor,
+            runner_name=os.environ.get("RUNNER_NAME", ""),
+            repository=repository,
+            workflow_name=workflow_name,
+            run_url=run_url,
+        )
 
         argocd_status = None
         with GitOpsRepoManager(
@@ -248,6 +274,8 @@ def main() -> int:
             "gitops_commit": gitops_commit,
             "changed_file": target["values_path"],
             "runner_name": os.environ.get("RUNNER_NAME", ""),
+            "workflow_run_id": run_id,
+            "workflow_run_url": run_url,
             "test_mode": test_mode,
             "outcome": "success",
             "prechecks_json": json.dumps(prechecks, indent=2),
@@ -279,6 +307,8 @@ def main() -> int:
             "deployment_action": "failed",
             "outcome": "failure",
             "error": str(exc),
+            "workflow_run_id": locals().get("run_id", ""),
+            "workflow_run_url": locals().get("run_url", ""),
             "prechecks_json": "{}",
             "argocd_status_json": "{}",
             "lock_json": json.dumps(failure_lock, indent=2),
