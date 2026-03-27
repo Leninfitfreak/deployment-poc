@@ -7,7 +7,7 @@ deployments:
       last_ticket: SCRUM-8
       last_argocd_app: frontend-dev
       last_changed_file: applications/frontend/helm/values-dev.yaml
-      last_deployed_at: '2026-03-27T16:44:20+00:00'
+      last_deployed_at: '2026-03-27T16:45:40+00:00'
       last_status: success
       last_action: already_deployed
       last_sync_status: Synced
