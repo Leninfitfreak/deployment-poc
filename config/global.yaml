@@ -9,3 +9,27 @@ default_runner_labels:
   - leninkart
   - local
   - dev
+jira_feedback:
+  enabled: true
+  transition_name_candidates:
+    success:
+      - Done
+      - Deployed
+      - Closed
+    failure:
+      - Failed
+      - Blocked
+      - In Progress
+    already_deployed:
+      - Done
+      - Deployed
+      - In Progress
+    rollback_skipped:
+      - Done
+      - Deployed
+      - In Progress
+  comment_on:
+    success: true
+    failure: true
+    noop: true
+  require_transition_success: false

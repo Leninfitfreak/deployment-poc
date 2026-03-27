@@ -16,6 +16,12 @@ It demonstrates:
 
 Jira Ticket -> GitHub Actions -> metadata parsing -> target resolution -> GitOps update -> ArgoCD reconciliation -> result reporting
 
+It now also closes the feedback loop back into Jira by:
+
+- discovering available Jira transitions at runtime
+- transitioning the deployment ticket by configured transition name candidates
+- adding a deployment result comment for success, failure, and no-op outcomes
+
 ## LeninKart Alignment
 
 This POC is aligned to the real LeninKart setup discovered from the workspace:
@@ -71,6 +77,13 @@ To adapt this POC to another project, update only:
 - `config/jira_field_mapping.yaml`
 - `config/deployment_policy.yaml`
 
+The Jira feedback behavior is also config-driven through `config/global.yaml`, including:
+
+- success transition candidates
+- failure transition candidates
+- no-op transition candidates
+- whether comments are posted for success, failure, and no-op outcomes
+
 ## Deployment Safety Layer
 
 The POC now includes a minimal production-style safety layer:
@@ -118,3 +131,30 @@ Automatic rollback remains policy-gated and disabled by default in `config/deplo
 ## Runtime Note
 
 The intended cluster context is `k3d-leninkart-dev`, but live cluster access was unavailable during this implementation session because the local k3d / Docker runtime was not active. Repo-backed GitOps discovery was therefore treated as authoritative for the initial POC design.
+
+## Jira Feedback Automation
+
+After the final deployment result is known, the orchestrator now performs a best-effort Jira feedback pass.
+
+Behavior:
+
+- `deployed`, `reconciled`, `rolled_back`, and other successful outcomes
+  - try a configured success transition
+  - add a success comment
+- `already_deployed` and `rollback_skipped`
+  - try the configured no-op transition policy
+  - add a clear explanatory comment
+- `failed`
+  - try the configured failure transition policy
+  - add a failure comment when the ticket was fetched successfully
+
+Safety rules:
+
+- transition ids are never hardcoded
+- Jira transitions are resolved dynamically from the issue's live available transitions
+- if no matching transition is available, the deployment result is still preserved and the workflow records a Jira warning
+- if deployment succeeds but Jira feedback fails, the deployment remains successful and the Jira warning is reported separately
+
+Reference:
+
+- `docs/JIRA_STATUS_AND_COMMENT_AUTOMATION.md`

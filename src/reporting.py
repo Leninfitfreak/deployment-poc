@@ -61,6 +61,24 @@ def write_reports(root: Path, result: dict) -> None:
         if target.get("rollback_source_version"):
             markdown.append(f"- Rollback source version: `{target.get('rollback_source_version', '')}`")
 
+    try:
+        jira_feedback = json.loads(result.get("jira_feedback_json", "{}") or "{}")
+    except Exception:
+        jira_feedback = {}
+    if jira_feedback:
+        markdown.extend(
+            [
+                f"- Jira feedback mode: `{jira_feedback.get('mode', '')}`",
+                f"- Jira transition result: `{jira_feedback.get('jira_transition_result', '')}`",
+                f"- Jira transition used: `{jira_feedback.get('jira_transition_name_used', '')}`",
+                f"- Jira comment added: `{jira_feedback.get('jira_comment_added', False)}`",
+                f"- Jira final status: `{jira_feedback.get('final_status', '')}`",
+                f"- Jira feedback policy satisfied: `{jira_feedback.get('policy_satisfied', '')}`",
+            ]
+        )
+        if jira_feedback.get("jira_feedback_error"):
+            markdown.append(f"- Jira feedback warning: `{jira_feedback.get('jira_feedback_error', '')}`")
+
     if result.get("error"):
         markdown.extend(["", "## Error", "", f"`{result['error']}`"])
 
@@ -90,6 +108,10 @@ def write_reports(root: Path, result: dict) -> None:
             "## Post-checks",
             "",
             f"```json\n{result.get('postchecks_json', '{}')}\n```",
+            "",
+            "## Jira Feedback",
+            "",
+            f"```json\n{result.get('jira_feedback_json', '{}')}\n```",
             "",
         ]
     )

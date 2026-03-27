@@ -66,6 +66,46 @@ Currently validated LeninKart dev aliases:
 
 These files are the only supported place for project, environment, runner, repo, and version alias changes.
 
+## Jira Status And Comment Automation
+
+After the final deployment result is known, the orchestrator performs a best-effort Jira feedback step.
+
+Configured in:
+
+- `config/global.yaml`
+
+Current policy shape:
+
+- `jira_feedback.transition_name_candidates.success`
+- `jira_feedback.transition_name_candidates.failure`
+- `jira_feedback.transition_name_candidates.already_deployed`
+- `jira_feedback.transition_name_candidates.rollback_skipped`
+- `jira_feedback.comment_on.success`
+- `jira_feedback.comment_on.failure`
+- `jira_feedback.comment_on.noop`
+
+Important behavior:
+
+1. the system discovers live available transitions for the Jira issue before attempting a status change
+2. transitions are matched by configured names or target status names, never by hardcoded transition ids
+3. if the ticket is already in the desired target status, transition is skipped cleanly
+4. if no configured transition is available from the current state, the system still attempts the Jira comment and records a warning
+5. if deployment succeeded but Jira feedback failed, the deployment remains successful and the Jira feedback issue is reported separately
+
+Comment content includes:
+
+- deployment result
+- Jira ticket
+- component
+- environment
+- requested version
+- resolved version
+- GitOps commit
+- ArgoCD app
+- final Sync and Health status
+- workflow run URL
+- timestamp
+
 ## Locking And State
 
 The hardened orchestrator writes:
@@ -182,6 +222,7 @@ Reference:
 
 - `docs/DEPLOYMENT_STATE_AND_ROLLBACK.md`
 - `docs/STALE_LOCK_RECOVERY.md`
+- `docs/JIRA_STATUS_AND_COMMENT_AUTOMATION.md`
 
 ## Local Smoke Check Note
 
