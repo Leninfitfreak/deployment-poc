@@ -4,10 +4,10 @@ deployments:
       last_version: '23599512080'
       last_requested_version: v2
       last_gitops_commit: a5530ce5dccff30803b262516d8e66edc0022040
-      last_ticket: SCRUM-6
+      last_ticket: SCRUM-7
       last_argocd_app: frontend-dev
       last_changed_file: applications/frontend/helm/values-dev.yaml
-      last_deployed_at: '2026-03-26T18:56:09+00:00'
+      last_deployed_at: '2026-03-27T15:51:05+00:00'
       last_status: success
       last_action: already_deployed
       last_sync_status: Synced
