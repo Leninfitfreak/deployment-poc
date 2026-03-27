@@ -20,6 +20,10 @@ apps:
     aliases: [product-service, product, products]
     values_path_by_env:
       dev: applications/product-service/helm/values-dev.yaml
+    version_aliases_by_env:
+      dev:
+        v1: "23599211809"
+        v2: "23599512382"
     argocd_app_by_env:
       dev: dev-product-service
     namespace_by_env:
@@ -32,6 +36,10 @@ apps:
     aliases: [order-service, order, orders]
     values_path_by_env:
       dev: applications/order-service/helm/values-dev.yaml
+    version_aliases_by_env:
+      dev:
+        v1: "23599211965"
+        v2: "23599512459"
     argocd_app_by_env:
       dev: dev-order-service
     namespace_by_env:

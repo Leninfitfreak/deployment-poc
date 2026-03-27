@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+from pathlib import Path
 
 from .jira_client import JiraClient
 
@@ -24,7 +25,28 @@ def main() -> int:
         os.environ["JIRA_API_TOKEN"],
     )
     issue = jira.create_issue(args.project_key, args.summary, description)
-    print(json.dumps({"key": issue.key, "summary": issue.summary, "description": issue.description}, indent=2))
+    result = {"key": issue.key, "summary": issue.summary, "description": issue.description}
+    artifacts_dir = Path("artifacts")
+    artifacts_dir.mkdir(parents=True, exist_ok=True)
+    (artifacts_dir / "jira-ticket.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
+    (artifacts_dir / "jira-ticket.md").write_text(
+        "\n".join(
+            [
+                "# Jira Test Ticket",
+                "",
+                f"- Key: `{issue.key}`",
+                f"- Summary: `{issue.summary}`",
+                "",
+                "## Description",
+                "",
+                "```text",
+                issue.description,
+                "```",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    print(json.dumps(result, indent=2))
     return 0
 
 

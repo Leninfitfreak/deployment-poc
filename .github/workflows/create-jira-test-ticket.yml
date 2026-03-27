@@ -54,3 +54,10 @@ jobs:
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
           JIRA_TICKET_DESCRIPTION: ${{ inputs.description }}
         run: python -m src.create_test_ticket --project-key "${{ inputs.project_key }}" --summary "${{ inputs.summary }}"
+
+      - name: Upload Jira ticket artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jira-ticket
+          path: artifacts/
