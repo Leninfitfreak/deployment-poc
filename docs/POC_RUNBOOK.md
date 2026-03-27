@@ -32,6 +32,18 @@ url: http://dev.leninkart.local/api/products
 - a literal deployable image tag
 - a Jira-friendly release alias that is resolved through `config/app_mapping.yaml`
 
+Currently validated LeninKart dev aliases:
+
+- `frontend`
+  - `v1 -> 23599212196`
+  - `v2 -> 23599512080`
+- `product-service`
+  - `v1 -> 23599211809`
+  - `v2 -> 23599512382`
+- `order-service`
+  - `v1 -> 23599211965`
+  - `v2 -> 23599512459`
+
 ## Required GitHub Secrets
 
 - `JIRA_BASE_URL`
@@ -67,6 +79,12 @@ If a deployment is already in progress for the same app/environment, the next ru
 
 If a run is repeated after success, the orchestrator uses the saved state plus live ArgoCD verification to skip or
 reconcile safely.
+
+This rerun-safe behavior is now proven for:
+
+- `frontend` via `SCRUM-8`
+- `product-service` via rerun of `SCRUM-9`
+- `order-service` via rerun of `SCRUM-11`
 
 ## Self-Hosted Runner Expectations
 
@@ -169,3 +187,9 @@ Reference:
 If the Jira or config URL uses a local hostname such as `dev.leninkart.local`, direct DNS resolution may depend on the
 machine hosts-file setup. The LeninKart ingress is still reachable locally through `127.0.0.1` with the original host
 header when a runner-side smoke check is needed.
+
+## Multi-Service Validation Reference
+
+Live multi-service validation evidence is recorded in:
+
+- [POC_MULTI_SERVICE_VALIDATION_REPORT.md](/D:/Projects/Services/deployment-poc/docs/POC_MULTI_SERVICE_VALIDATION_REPORT.md)

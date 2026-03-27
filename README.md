@@ -29,6 +29,9 @@ This POC is aligned to the real LeninKart setup discovered from the workspace:
   - `product-service`
   - `order-service`
 
+Validated live multi-service deployment support is documented in
+[docs/POC_MULTI_SERVICE_VALIDATION_REPORT.md](/D:/Projects/Services/deployment-poc/docs/POC_MULTI_SERVICE_VALIDATION_REPORT.md).
+
 ## How It Works
 
 1. GitHub Actions accepts a Jira ticket number
@@ -44,6 +47,18 @@ If a Jira ticket omits `url`, the orchestrator falls back to the config-mapped e
 
 If a Jira ticket uses a release alias instead of a literal image tag, the orchestrator can resolve that alias through
 `config/app_mapping.yaml` for the target app and environment.
+
+For LeninKart dev, the currently validated Jira-friendly aliases are:
+
+- `frontend`
+  - `v1 -> 23599212196`
+  - `v2 -> 23599512080`
+- `product-service`
+  - `v1 -> 23599211809`
+  - `v2 -> 23599512382`
+- `order-service`
+  - `v1 -> 23599211965`
+  - `v2 -> 23599512459`
 
 ## Reusability
 
