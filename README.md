@@ -1,170 +1,362 @@
-# Deployment POC
+# LeninKart Deployment POC
 
-Reusable Jira-driven deployment automation proof of concept for GitOps-managed platforms.
+Reusable Jira-driven deployment orchestration for the LeninKart dev platform, built around GitHub Actions, a Windows self-hosted runner, GitOps in `leninkart-infra`, and ArgoCD running on a local `k3d` cluster.
 
-## What This Repo Is
+## Why This Project Exists
 
-`deployment-poc` is a separate orchestration repository.
+This repository exists to demonstrate a practical deployment control plane that starts from a Jira ticket and drives a real GitOps-based deployment flow without embedding deployment logic inside the application repos.
 
-It is not:
+It solves a few concrete problems:
 
-- `project-validation`
-- an application source repo
-- the GitOps source of truth
+- deployment intent is captured in Jira instead of being passed around informally
+- deployment logic stays separate from application source code
+- GitOps remains the source of truth through `leninkart-infra`
+- ArgoCD reconciliation is verified against the exact pushed revision
+- Jira gets progress updates and final deployment feedback
+- operational safety is built in through state, locks, idempotency, stale-lock recovery, and rollback scaffolding
 
-It demonstrates:
+## System Overview
 
-Jira Ticket -> GitHub Actions -> metadata parsing -> target resolution -> GitOps update -> ArgoCD reconciliation -> result reporting
+LeninKart currently consists of:
 
-Important trigger note:
+- business applications
+  - `leninkart-frontend`
+  - `leninkart-product-service`
+  - `leninkart-order-service`
+- deployment and GitOps layer
+  - `deployment-poc`
+  - GitHub Actions
+  - self-hosted runner `leninkart-runner`
+  - `leninkart-infra` on branch `dev`
+  - ArgoCD in the local `k3d-leninkart-dev` cluster
+- platform support layer
+  - `kafka-platform`
+  - `observability-stack`
+- validation and proof layer
+  - `project-validation`
 
-- creating a Jira ticket by itself does not start a deployment
-- the current system starts only when `.github/workflows/deploy-from-jira.yml` is dispatched with a Jira ticket key
-- there is currently no Jira webhook, Jira automation callback, scheduled poller, or background listener that auto-dispatches GitHub Actions on issue creation
+The current trigger model is intentionally explicit:
 
-It now also closes the feedback loop back into Jira by:
+- a Jira ticket is created manually
+- the GitHub Actions workflow `.github/workflows/deploy-from-jira.yml` is dispatched manually with the Jira ticket key
+- the self-hosted runner executes the deployment
+- Jira receives stage-wise progress comments and final deployment feedback
 
-- discovering available Jira transitions at runtime
-- posting concise progress comments at major deployment stages
-- transitioning the deployment ticket by configured transition name candidates
-- adding a deployment result comment for success, failure, and no-op outcomes
+This is not currently an automatic Jira-webhook-triggered system. That distinction is important and intentional in the current README.
 
-## LeninKart Alignment
+## Architecture
 
-This POC is aligned to the real LeninKart setup discovered from the workspace:
+### Platform Architecture
 
-- GitOps repo: `leninkart-infra`
-- active GitOps branch for dev: `dev`
-- active namespace: `dev`
-- root ArgoCD app: `leninkart-root`
-- deployable targets:
-  - `frontend`
-  - `product-service`
-  - `order-service`
+![LeninKart platform architecture](docs/architecture/leninkart-platform-architecture.png)
 
-Validated live multi-service deployment support is documented in
-[docs/POC_MULTI_SERVICE_VALIDATION_REPORT.md](/D:/Projects/Services/deployment-poc/docs/POC_MULTI_SERVICE_VALIDATION_REPORT.md).
+The high-level platform has six real layers:
 
-## How It Works
+- request and control
+  - Jira deployment request
+  - GitHub Actions manual dispatch
+  - self-hosted runner on the same machine as `k3d`
+- orchestration and safety
+  - `deployment-poc` orchestrator
+  - config-driven target resolution
+  - deployment state, locking, stale-lock recovery, rollback scaffolding
+  - Jira progress and final feedback
+- GitOps and delivery
+  - `leninkart-infra/dev`
+  - ArgoCD apps under `argocd/applications/dev`
+  - exact revision validation
+- runtime services
+  - `frontend-dev`
+  - `dev-product-service`
+  - `dev-order-service`
+  - supporting runtime apps like ingress, postgres, Vault, and observability components
+- supporting platform
+  - Kafka runtime
+  - observability bootstrap and runtime dashboards/logs/traces
+- validation and proof
+  - `project-validation`
+  - browser-driven screenshots
+  - validation reports and MkDocs pages
 
-1. GitHub Actions accepts a Jira ticket number
-2. Jira API fetches the issue
-3. description metadata is parsed into structured deployment fields
-4. validation rejects incomplete or unsupported requests
-5. config-driven resolution maps the request to repo/path/app/namespace
-6. the orchestrator updates the target GitOps values file
-7. the change is committed and pushed
-8. ArgoCD can be polled for `Synced` and `Healthy` if credentials are configured
+### Deployment Flow
 
-If a Jira ticket omits `url`, the orchestrator falls back to the config-mapped environment URL for the resolved app.
+![LeninKart deployment flow](docs/architecture/deployment-flow.png)
 
-If a Jira ticket uses a release alias instead of a literal image tag, the orchestrator can resolve that alias through
-`config/app_mapping.yaml` for the target app and environment.
+The focused deployment path is:
 
-For LeninKart dev, the currently validated Jira-friendly aliases are:
+`Jira ticket -> workflow_dispatch -> self-hosted runner -> deployment-poc -> leninkart-infra/dev -> ArgoCD -> Synced + Healthy -> Jira feedback`
+
+## Repositories Involved
+
+| Repo / workspace | Branch | Current role |
+| --- | --- | --- |
+| `deployment-poc` | `main` | Jira-driven deployment orchestrator and safety layer |
+| `leninkart-infra` | `dev` | GitOps source of truth for the dev environment |
+| `leninkart-frontend` | `dev` | Frontend application |
+| `leninkart-product-service` | `dev` | Product API service |
+| `leninkart-order-service` | `dev` | Order API service |
+| `kafka-platform` | `main` | Kafka runtime and messaging support |
+| `observability-stack` | workspace bootstrap | Generates values and assets for Grafana, Prometheus, Loki, Tempo, and Promtail |
+| `project-validation` | `main` | Validation, screenshot proof, MkDocs-ready reporting |
+
+## Supported Services
+
+The currently validated dev deployables are:
 
 - `frontend`
-  - `v1 -> 23599212196`
-  - `v2 -> 23599512080`
 - `product-service`
-  - `v1 -> 23599211809`
-  - `v2 -> 23599512382`
 - `order-service`
-  - `v1 -> 23599211965`
-  - `v2 -> 23599512459`
 
-## Reusability
+These are mapped in [config/app_mapping.yaml](config/app_mapping.yaml) through:
 
-To adapt this POC to another project, update only:
+- Jira-facing aliases
+- GitOps values file paths
+- ArgoCD app names
+- namespace mappings
+- environment URLs
+- version aliases such as `v1` and `v2`
 
-- `config/global.yaml`
-- `config/projects.yaml`
-- `config/app_mapping.yaml`
-- `config/environments.yaml`
-- `config/jira_field_mapping.yaml`
-- `config/deployment_policy.yaml`
+Live multi-service validation is documented in [docs/POC_MULTI_SERVICE_VALIDATION_REPORT.md](docs/POC_MULTI_SERVICE_VALIDATION_REPORT.md).
 
-The Jira feedback behavior is also config-driven through `config/global.yaml`, including:
+## End-to-End Deployment Flow
 
-- which progress stages post Jira comments
-- success transition candidates
-- failure transition candidates
-- no-op transition candidates
-- whether comments are posted for success, failure, and no-op outcomes
+1. A Jira ticket is created with deployment metadata in the description.
+2. GitHub Actions `workflow_dispatch` starts `.github/workflows/deploy-from-jira.yml`.
+3. The job lands on the Windows self-hosted runner with labels:
+   - `self-hosted`
+   - `Windows`
+   - `X64`
+   - `leninkart`
+   - `local`
+   - `dev`
+4. `deployment-poc` fetches the Jira issue through the Jira API.
+5. The ticket description is parsed into structured deployment metadata.
+6. Validation checks the environment, component, version, and target mapping.
+7. The orchestrator resolves the GitOps target in `leninkart-infra/dev`.
+8. A deployment lock is acquired.
+9. The target `values-dev.yaml` file is updated and committed when a new deployment is needed.
+10. ArgoCD reconciliation is verified against the exact GitOps commit.
+11. Post-checks run, including URL validation with a localhost host-header fallback when needed.
+12. Jira receives stage-wise progress comments and final status/comment feedback.
+13. Deployment state is updated only after a verified successful deployment outcome.
 
-## Deployment Safety Layer
+## Deployment Hardening Features
 
-The POC now includes a minimal production-style safety layer:
+The current implementation already includes:
 
-- Git-tracked deployment state in `config/deployment_state.yaml`
-- Git-tracked deployment locks in `config/deploy_locks.yaml`
+- config-driven target resolution
+- deployment state tracking
+- deployment locks
 - duplicate deployment prevention
-- retry-safe reconciliation handling
-- rollback-ready state history
-- stale-lock detection based on lock age plus GitHub Actions run status
-- safe auto-recovery for dead locks when policy allows it
-- explicit manual unlock workflow: `.github/workflows/unlock-deployment-lock.yml`
-- explicit rollback mode via `--rollback-to-last-success`
-- policy-driven safety toggles in `config/deployment_policy.yaml`
+- retry-safe reruns
+- exact ArgoCD revision verification
+- stale-lock detection using both lock age and GitHub Actions run state
+- manual unlock workflow
+- rollback scaffolding
+- policy-driven test mode
 
-## Safe Test Mode
+Relevant docs:
 
-Set `TEST_MODE=true` or pass `--test-mode` to simulate the deployment flow without pushing to the GitOps repo.
+- [docs/DEPLOYMENT_STATE_AND_ROLLBACK.md](docs/DEPLOYMENT_STATE_AND_ROLLBACK.md)
+- [docs/STALE_LOCK_RECOVERY.md](docs/STALE_LOCK_RECOVERY.md)
+- [docs/JIRA_STATUS_AND_COMMENT_AUTOMATION.md](docs/JIRA_STATUS_AND_COMMENT_AUTOMATION.md)
 
-In test mode the orchestrator:
+## Jira Feedback And Progress Reporting
 
-- parses and validates the Jira ticket
-- resolves the deployment target
-- updates the GitOps file only in the temporary clone
-- skips the real push
-- returns a simulated successful ArgoCD status for reporting
+Jira is not only the input source. It now also receives operational feedback:
 
-## Rollback Mode
+- stage-wise progress comments
+  - `workflow_triggered`
+  - `jira_validated`
+  - `target_resolved`
+  - `lock_acquired`
+  - `gitops_commit_pushed`
+  - `argocd_sync_started`
+  - `argocd_synced_healthy`
+  - `post_checks_completed`
+  - `completed`
+  - `failed`
+- final success, failure, and no-op comments
+- transition attempts resolved dynamically by transition name, not hardcoded ids
 
-For a safe manual rollback to the last known successful deployment state for the resolved app and environment:
+The current configured transition policy lives in [config/global.yaml](config/global.yaml).
 
-```powershell
-python -m src.orchestrator --jira-ticket SCRUM-6 --rollback-to-last-success
-```
+## GitOps And ArgoCD Alignment
 
-This mode:
+The current dev environment is GitOps-driven through:
 
-- reads `config/deployment_state.yaml`
-- resolves the last known successful version for the app and environment
-- updates the GitOps values file back to that version
-- waits for ArgoCD to report `Synced` and `Healthy` on the exact rollback commit
+- root ArgoCD application: `leninkart-root`
+- GitOps repo: `https://github.com/Leninfitfreak/leninkart-infra.git`
+- target revision: `dev`
+- application definitions under `leninkart-infra/argocd/applications/dev`
 
-Automatic rollback remains policy-gated and disabled by default in `config/deployment_policy.yaml`.
+Current active ArgoCD app set includes:
 
-## Runtime Note
+- `frontend-dev`
+- `dev-product-service`
+- `dev-order-service`
+- `postgres-dev`
+- `grafana-dev`
+- `prometheus-dev`
+- `loki-dev`
+- `promtail-dev`
+- `tempo-dev`
+- `vault`
+- `vault-secretstore`
+- `vault-externalsecrets`
+- `dev-ingress`
+- `loadtest-dev`
+- `argocd-config`
 
-The intended cluster context is `k3d-leninkart-dev`, but live cluster access was unavailable during this implementation session because the local k3d / Docker runtime was not active. Repo-backed GitOps discovery was therefore treated as authoritative for the initial POC design.
+## Observability Integration
 
-## Jira Feedback Automation
+Observability is part of the platform story, not an afterthought.
 
-After the final deployment result is known, the orchestrator now performs a best-effort Jira feedback pass.
+The current runtime uses:
 
-Behavior:
+- Grafana
+- Prometheus
+- Loki
+- Promtail
+- Tempo
 
-- progress comments are posted at meaningful deployment stages such as workflow start, target resolution, lock acquisition, GitOps push, ArgoCD verification, and completion
-- `deployed`, `reconciled`, `rolled_back`, and other successful outcomes
-  - try a configured success transition
-  - add a success comment
-- `already_deployed` and `rollback_skipped`
-  - try the configured no-op transition policy
-  - add a clear explanatory comment
-- `failed`
-  - try the configured failure transition policy
-  - add a failure comment when the ticket was fetched successfully
+The `observability-stack/bootstrap` workspace generates the values and bootstrap content that feed the observability apps managed by `leninkart-infra`. `project-validation` already captures real browser proof for dashboards, logs, metrics, and traces.
 
-Safety rules:
+## Validation And Proof System
 
-- progress comments are concise and stage-based to avoid noisy per-step spam
-- transition ids are never hardcoded
-- Jira transitions are resolved dynamically from the issue's live available transitions
-- if no matching transition is available, the deployment result is still preserved and the workflow records a Jira warning
-- if deployment succeeds but Jira feedback fails, the deployment remains successful and the Jira warning is reported separately
+`project-validation` is the evidence and documentation layer for the platform.
+
+It now provides:
+
+- real browser-driven deployment proof
+- GitHub Actions run proof
+- GitOps commit proof
+- ArgoCD `Synced` and `Healthy` proof
+- application reachability proof
+- observability screenshots
+- MkDocs-ready reports
+
+Important honest note:
+
+- Jira browser UI proof is still a warning in `project-validation` because a local Jira browser-authenticated session is not configured there yet
+- Jira API-backed deployment validation is still working and verified in `deployment-poc`
 
 Reference:
 
-- `docs/JIRA_STATUS_AND_COMMENT_AUTOMATION.md`
+- deployment validation proof lives in the companion `project-validation` repository
+- the latest local workspace report is `project-validation/docs/DEPLOYMENT_POC_VALIDATION_REPORT.md`
+
+## Repo Structure
+
+```text
+deployment-poc/
+  .github/workflows/
+    deploy-from-jira.yml
+    create-jira-test-ticket.yml
+    unlock-deployment-lock.yml
+  config/
+    global.yaml
+    projects.yaml
+    app_mapping.yaml
+    environments.yaml
+    jira_field_mapping.yaml
+    deployment_policy.yaml
+    deployment_state.yaml
+    deploy_locks.yaml
+  src/
+    orchestrator.py
+    jira_client.py
+    jira_feedback.py
+    target_resolver.py
+    gitops_repo.py
+    argocd_client.py
+    state_manager.py
+    reporting.py
+  docs/
+    PLATFORM_DISCOVERY_SUMMARY.md
+    POC_E2E_VALIDATION_REPORT.md
+    POC_MULTI_SERVICE_VALIDATION_REPORT.md
+    JIRA_STATUS_AND_COMMENT_AUTOMATION.md
+    DEPLOYMENT_STATE_AND_ROLLBACK.md
+    STALE_LOCK_RECOVERY.md
+    architecture/
+```
+
+## How To Run The Current Flow
+
+Dispatch the workflow manually from GitHub Actions or run the orchestrator locally with the same inputs and secret model.
+
+### Jira Ticket Format
+
+```text
+app: leninkart
+component: product-service
+env: dev
+version: v1
+url: http://dev.leninkart.local/api/products
+```
+
+### GitHub Actions Entry Point
+
+Workflow:
+
+- [`.github/workflows/deploy-from-jira.yml`](.github/workflows/deploy-from-jira.yml)
+
+Inputs:
+
+- `jira_ticket`
+- `trigger_argocd_sync`
+- `test_mode`
+- `rollback_to_last_success`
+
+Required secrets:
+
+- `JIRA_BASE_URL`
+- `JIRA_EMAIL`
+- `JIRA_API_TOKEN`
+- `INFRA_PAT`
+- `ARGOCD_SERVER`
+- `ARGOCD_AUTH_TOKEN`
+
+### Local Test Mode
+
+```powershell
+python -m src.orchestrator --jira-ticket SCRUM-5 --test-mode
+```
+
+### Manual Rollback To Last Success
+
+```powershell
+python -m src.orchestrator --jira-ticket SCRUM-5 --rollback-to-last-success
+```
+
+## Current Limitations
+
+- Jira ticket creation does not auto-trigger the workflow yet
+- the entrypoint is still manual GitHub Actions dispatch with the Jira key
+- the deployment flow is currently scoped to the dev environment
+- the self-hosted runner model depends on the local machine hosting `k3d`, ArgoCD access, Git, Python, `kubectl`, and `argocd`
+- `observability-stack` is a workspace bootstrap layer here, not a tracked Git repo in this local clone
+- `project-validation` still warns for Jira browser UI proof until local browser credentials/session are configured
+
+## Future Enhancements
+
+- Jira webhook or Jira automation trigger into GitHub Actions
+- staged environments beyond `dev`
+- promotion flows instead of environment-local deploy requests
+- richer rollback policies
+- artifact-backed deployment dashboards
+- deeper automated smoke checks after deployment
+- stronger Jira browser proof inside `project-validation`
+
+## Reference Docs
+
+- [docs/PLATFORM_DISCOVERY_SUMMARY.md](docs/PLATFORM_DISCOVERY_SUMMARY.md)
+- [docs/POC_ARCHITECTURE.md](docs/POC_ARCHITECTURE.md)
+- [docs/POC_RUNBOOK.md](docs/POC_RUNBOOK.md)
+- [docs/POC_E2E_VALIDATION_REPORT.md](docs/POC_E2E_VALIDATION_REPORT.md)
+- [docs/POC_MULTI_SERVICE_VALIDATION_REPORT.md](docs/POC_MULTI_SERVICE_VALIDATION_REPORT.md)
+- [docs/JIRA_STATUS_AND_COMMENT_AUTOMATION.md](docs/JIRA_STATUS_AND_COMMENT_AUTOMATION.md)
+- [docs/DEPLOYMENT_STATE_AND_ROLLBACK.md](docs/DEPLOYMENT_STATE_AND_ROLLBACK.md)
+- [docs/STALE_LOCK_RECOVERY.md](docs/STALE_LOCK_RECOVERY.md)
+- [docs/architecture/README_ARCHITECTURE.md](docs/architecture/README_ARCHITECTURE.md)
