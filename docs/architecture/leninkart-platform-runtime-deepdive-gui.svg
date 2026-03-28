@@ -4,16 +4,17 @@
   <linearGradient id="bgfade" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#f7faff"/></linearGradient>
   <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#94a3b8" flood-opacity="0.16"/></filter>
   <style>
-    .title{font:700 38px 'Segoe UI',Arial,sans-serif;fill:#10233f}.subtitle{font:15px 'Segoe UI',Arial,sans-serif;fill:#5f718a}.section{font:700 21px 'Segoe UI',Arial,sans-serif;fill:#1f3557}.subsection{font:700 15px 'Segoe UI',Arial,sans-serif;fill:#24426b}.label{font:700 15px 'Segoe UI',Arial,sans-serif;fill:#20324d}.body{font:13px 'Segoe UI',Arial,sans-serif;fill:#5f6f86}.small{font:12px 'Segoe UI',Arial,sans-serif;fill:#728198}.micro{font:11px 'Segoe UI',Arial,sans-serif;fill:#728198}.box{fill:#ffffff;stroke:#d7e0ef;stroke-width:2}.groupBlue{fill:#ecf4ff;stroke:#c9daf7;stroke-width:2.2}.groupMint{fill:#eefaf4;stroke:#cce9d7;stroke-width:2.2}.groupLav{fill:#f5efff;stroke:#ddcdf6;stroke-width:2.2}.groupGold{fill:#fff8de;stroke:#eadba2;stroke-width:2.2}.groupRose{fill:#fff0eb;stroke:#f2cdc1;stroke-width:2.2}.groupSteel{fill:#eef4fb;stroke:#cad7e8;stroke-width:2.2}.cluster{fill:#eaf2ff;stroke:#cad9ef;stroke-width:2.2}.inner{fill:#ffffff;stroke:#d7e0ef;stroke-width:2}.arrow{stroke:#3f5779;stroke-width:3;fill:none;marker-end:url(#arrow)}.proof{stroke:#2879ff;stroke-width:2.4;fill:none;stroke-dasharray:8 7;marker-end:url(#proofArrow)}.tele{stroke:#95a4ba;stroke-width:2.2;fill:none;stroke-dasharray:6 6;marker-end:url(#teleArrow)}.flow{fill:#16a34a;stroke:#ffffff;stroke-width:3}.flowtext{font:700 12px 'Segoe UI',Arial,sans-serif;fill:#ffffff}.chip{font:700 11px 'Segoe UI',Arial,sans-serif;fill:#ffffff}
+    .title{font:700 42px 'Segoe UI',Arial,sans-serif;fill:#10233f}.subtitle{font:16px 'Segoe UI',Arial,sans-serif;fill:#5f718a}.section{font:700 24px 'Segoe UI',Arial,sans-serif;fill:#1f3557}.subsection{font:700 17px 'Segoe UI',Arial,sans-serif;fill:#24426b}.label{font:700 16px 'Segoe UI',Arial,sans-serif;fill:#20324d}.body{font:13px 'Segoe UI',Arial,sans-serif;fill:#5f6f86}.small{font:12px 'Segoe UI',Arial,sans-serif;fill:#728198}.micro{font:11px 'Segoe UI',Arial,sans-serif;fill:#728198}.box{fill:#ffffff;stroke:#d7e0ef;stroke-width:2}.groupBlue{fill:#ecf4ff;stroke:#c9daf7;stroke-width:2.2}.groupMint{fill:#eefaf4;stroke:#cce9d7;stroke-width:2.2}.groupLav{fill:#f5efff;stroke:#ddcdf6;stroke-width:2.2}.groupGold{fill:#fff8de;stroke:#eadba2;stroke-width:2.2}.groupRose{fill:#fff0eb;stroke:#f2cdc1;stroke-width:2.2}.groupSteel{fill:#eef4fb;stroke:#cad7e8;stroke-width:2.2}.cluster{fill:#eaf2ff;stroke:#cad9ef;stroke-width:2.2}.inner{fill:#ffffff;stroke:#d7e0ef;stroke-width:2}.arrow{stroke:#3f5779;stroke-width:3;fill:none;marker-end:url(#arrow)}.proof{stroke:#2879ff;stroke-width:2.4;fill:none;stroke-dasharray:8 7;marker-end:url(#proofArrow)}.tele{stroke:#95a4ba;stroke-width:2.2;fill:none;stroke-dasharray:6 6;marker-end:url(#teleArrow)}.safety{stroke:#b45309;stroke-width:2.4;fill:none;stroke-dasharray:10 6;marker-end:url(#safetyArrow)}.flow{fill:#16a34a;stroke:#ffffff;stroke-width:3}.flowtext{font:700 12px 'Segoe UI',Arial,sans-serif;fill:#ffffff}.chip{font:700 11px 'Segoe UI',Arial,sans-serif;fill:#ffffff}
   </style>
   <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#3f5779"/></marker>
   <marker id="proofArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2879ff"/></marker>
-  <marker id="teleArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#95a4ba"/></marker>
+  <marker id="teleArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#95a4ba"/></marker><marker id="safetyArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#b45309"/></marker>
 </defs>
 <rect width="100%" height="100%" fill="url(#bgfade)"/>
 <text x="36" y="54" class="title">LeninKart Runtime &amp; Infra Deep Dive</text>
 <text x="36" y="82" class="subtitle">Refined deep-dive view with cleaner control-plane spacing, consistent arrow semantics, and stronger namespace clarity</text>
-<rect x="40" y="118" width="470" height="240" rx="24" class="groupBlue"/>
+<text x="36" y="108" class="section">Jira-driven GitOps deployment platform with safety controls, runtime observability, and browser-based evidence.</text>
+<rect x="40" y="130" width="470" height="228" rx="24" class="groupBlue"/>
 <rect x="530" y="118" width="710" height="270" rx="24" class="groupMint"/>
 <rect x="40" y="388" width="470" height="250" rx="24" class="groupLav"/>
 <rect x="40" y="668" width="470" height="230" rx="24" class="groupRose"/>
@@ -46,6 +47,11 @@
 <text x="398" y="220" class="label">GitHub Actions</text>
 <text x="398" y="242" class="body">Deploy From Jira</text>
 <text x="398" y="260" class="body">workflow_dispatch</text>
+
+<rect x="344" y="286" width="146" height="44" rx="12" fill="#eef6ff" stroke="#c9daf7" stroke-width="1.5"/>
+<text x="357" y="306" class="micro">Current trigger mode:</text>
+<text x="357" y="322" class="micro">manual workflow_dispatch only</text>
+
 <rect x="560" y="190" width="170" height="96" rx="18" class="box" filter="url(#shadow)"/>
 <rect x="560" y="190" width="170" height="6" rx="6" fill="#8b5cf6"/>
 <rect x="576" y="204" width="42" height="42" rx="12" fill="#f8fbff" stroke="#d8e2f0" stroke-width="1.5"/>
@@ -57,7 +63,7 @@
 <rect x="760" y="190" width="170" height="6" rx="6" fill="#16a34a"/>
 <rect x="776" y="204" width="42" height="42" rx="12" fill="#f8fbff" stroke="#d8e2f0" stroke-width="1.5"/>
 <image href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHJlY3QgeD0iNCIgeT0iNSIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE0IiByeD0iMyIgZmlsbD0iIzdjM2FlZCIvPjxwYXRoIGQ9Ik05IDloNk05IDEyaDZNOSAxNWg0IiBzdHJva2U9IiNlZGU5ZmUiIHN0cm9rZS13aWR0aD0iMS44IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48Y2lyY2xlIGN4PSIxNyIgY3k9IjE1IiByPSIyIiBmaWxsPSIjYzRiNWZkIi8+PC9zdmc+" x="781" y="209" width="32" height="32" preserveAspectRatio="xMidYMid meet"/>
-<text x="828" y="220" class="label">deployment-poc</text>
+<text x="828" y="220" class="label" font-weight="800">deployment-poc</text>
 <text x="828" y="242" class="body">orchestrator</text>
 <text x="828" y="260" class="body">state / locks / rollback</text>
 <rect x="960" y="190" width="140" height="96" rx="18" class="box" filter="url(#shadow)"/>
@@ -71,7 +77,7 @@
 <rect x="1130" y="190" width="180" height="6" rx="6" fill="#f97316"/>
 <rect x="1146" y="204" width="42" height="42" rx="12" fill="#f8fbff" stroke="#d8e2f0" stroke-width="1.5"/>
 <image href="data:image/svg+xml;base64,PHN2ZyByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+R2l0PC90aXRsZT48cGF0aCBmaWxsPSIjRjA1MDMyIiBkPSJNMjMuNTQ2IDEwLjkzTDEzLjA2Ny40NTJjLS42MDQtLjYwMy0xLjU4Mi0uNjAzLTIuMTg4IDBMOC43MDggMi42MjdsMi43NiAyLjc2Yy42NDUtLjIxNSAxLjM3OS0uMDcgMS44ODkuNDQxLjUxNi41MTUuNjU4IDEuMjU4LjQzOCAxLjlsMi42NTggMi42NmMuNjQ1LS4yMjMgMS4zODctLjA3OCAxLjkuNDM1LjcyMS43Mi43MjEgMS44ODQgMCAyLjYwNC0uNzE5LjcxOS0xLjg4MS43MTktMi42IDAtLjUzOS0uNTQxLS42NzQtMS4zMzctLjQwNC0xLjk5NkwxMi44NiA4Ljk1NXY2LjUyNWMuMTc2LjA4Ni4zNDIuMjAzLjQ4OC4zNDguNzEzLjcyMS43MTMgMS44ODMgMCAyLjYtLjcxOS43MjEtMS44ODkuNzIxLTIuNjA5IDAtLjcxOS0uNzE5LS43MTktMS44NzkgMC0yLjU5OC4xODItLjE4LjM4Ny0uMzE2LjYwNS0uNDA2VjguODM1Yy0uMjE3LS4wOTEtLjQyNC0uMjIyLS42LS40MDEtLjU0NS0uNTQ1LS42NzYtMS4zNDItLjM5Ni0yLjAwOUw3LjYzNiAzLjcuNDUgMTAuODgxYy0uNi42MDUtLjYgMS41ODQgMCAyLjE4OWwxMC40OCAxMC40NzdjLjYwNC42MDQgMS41ODIuNjA0IDIuMTg2IDBsMTAuNDMtMTAuNDNjLjYwNS0uNjAzLjYwNS0xLjU4MiAwLTIuMTg3Ii8+PC9zdmc+" x="1151" y="209" width="32" height="32" preserveAspectRatio="xMidYMid meet"/>
-<text x="1198" y="220" class="label">leninkart-infra</text>
+<text x="1198" y="220" class="label" font-weight="800">leninkart-infra</text>
 <text x="1198" y="242" class="body">dev branch</text>
 <text x="1198" y="260" class="body">app mappings / values</text>
 <rect x="1340" y="190" width="160" height="96" rx="18" class="box" filter="url(#shadow)"/>
@@ -84,7 +90,7 @@
 <rect x="1530" y="190" width="140" height="6" rx="6" fill="#fb923c"/>
 <rect x="1546" y="204" width="42" height="42" rx="12" fill="#f8fbff" stroke="#d8e2f0" stroke-width="1.5"/>
 <image href="data:image/svg+xml;base64,PHN2ZyByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+QXJnbzwvdGl0bGU+PHBhdGggZmlsbD0iI0VGN0I0RCIgZD0iTTEyLjU4MSAwYy40MzYuMDM3Ljg3MS4xIDEuMjk5LjE4NiAxLjY3OS4zODMgMy4xMjEgMS4yMTMgNC4zODIgMi4zNjUgMS4xNjEgMS4wNiAxLjkxNyAyLjM3MiAyLjMzNSAzLjg4MS4wODkuMzIxLjIxNi41Ni41ODYuNjI0LjIwNS4wMzUuMjM4LjI0NS4yMzkuNDMuMDAzLjY0Ni4wMDIgMS4yOTQuMDAyIDEuOTRsLS4wMDIgMS4yMWMtLjAwMS4zNTYtLjExNi40NzktLjQ2Ni40NzQtLjIxMS0uMDAzLS4yOTMuMTE5LS4zNDQuMjkxLS4xNDYuNDg5LS4zMy45NjYtLjU1MiAxLjQyNi0uODE4IDEuNjgyLTIuMDg0IDIuOTM4LTMuNjg4IDMuODctLjA3Ny4wNDUtLjE1NS4wODgtLjIzMy4xMzEtLjI1Mi4xMzctLjI1OC4xNDYtLjE1NS40MTUuMTE0LjI5OS4zNTguNTI5LjY2NC42MjUuMjY5LjA5Ni41NTMuMTM0LjgyNy4yMWEuNjcyLjY3MiAwIDAgMSAuMjM2LjA5NGMtLjA2Ni4wODItLjE1Ni4wNjctLjIzMS4wODItLjM2LjA3My0uNzEzLjE4NC0xLjA4Ni4xN2ExLjI3NSAxLjI3NSAwIDAgMS0uNDM4LS4wNjRjLS4xMTQtLjA0NS0uMTUyLS4wMDYtLjE3Ni4xMDlhNS4zNTQgNS4zNTQgMCAwIDAtLjA4NC45MmMtLjAxNS42MTctLjA3MSAxLjIzLS4xMTIgMS44NDQtLjA0Mi41OTgtLjAxOC42NTEuNTU4Ljg0Mi4yODEuMDk0LjU2My4xODcuODQyLjI4Ni4wNjkuMDI0LjE1LjAzOC4xOTIuMTE3LS4wNC4wNTctLjA5OC4wMzUtLjE0Ni4wMzUtLjQ5My4wMDMtLjk4NS4wMDUtMS40NzguMDAxLS41MjQtLjAwNS0uODA2LS4yODItLjg0NS0uODAzLS4wNTUtLjc2Mi0uMTItMS41MjQtLjE4Mi0yLjI4NmEuOTQ3Ljk0NyAwIDAgMC0uMDI2LS4xMmMtLjA3OS40NTUtLjA2NS44NzktLjA4NCAxLjI5OC0uMDIzLjUyOC0uMDA4IDEuMDU3LS4wMDcgMS41ODQgMCAuMjcuMDg2LjM4OC4zMzUuNDgzLjM1OS4xMzUuNzExLjI5NSAxLjExNC4yNjIuMTQxLS4wMTIuMjc2LjA2Mi40MDIuMTI5LjAzMi4wMTcuMDczLjAzMy4wNjkuMDczLS4wMDQuMDQzLS4wNDkuMDQ3LS4wODQuMDQ1LS42NTctLjAxOS0xLjMxNy4wNjUtMS45NzItLjAyOC0uMzIzLS4wNDYtLjUzMy0uMjM2LS42MzEtLjU1Mi0uMDk0LS4zMDMtLjExNC0uNjE3LS4xMzctLjkzLS4wNDYtLjYyNi0uMDc4LTEuMjUzLS4xMTYtMS44OGEuMjIyLjIyMiAwIDAgMC0uMDYxLS4xNzEuMjgyLjI4MiAwIDAgMC0uMDMxLjE5M2MtLjAwMi45NTYtLjAwMiAxLjkxMS0uMDAxIDIuODY2IDAgLjM4OC4xMjMuNTc1LjQ5NC43MDguNDgxLjE3Mi45NzYuMjk4IDEuNDcuNDIzLjExLjAyOC4yMjUuMDQ3LjI0Mi4xOTJoLTEuODUyYy0uMDUxLS4wMS0uMTAzLS4wMjItLjE1NS0uMDMtLjcwMS0uMS0xLjAwMS0uMzcyLTEuMTQzLTEuMDQybC0uMDY3LS4zMzEtLjIyNi0xLjEwM2MtLjA2OS4xMi0uMTE4LjI1LS4xNDQuMzg2LS4wODMuMzk5LS4xNTEuODAyLS4yNDMgMS4yLS4xMTMuNDkzLS40NDQuNzYzLS45MzIuODU3bC0uMzMuMDYzSDguNTU4Yy4wNTctLjE3MS4yMTYtLjE4NS4zNTUtLjIyMS40NzYtLjEyNy45Ni0uMjIzIDEuNDE3LS40MDlhLjYwMy42MDMgMCAwIDAgLjM5Ny0uNTIxYy4wNTgtLjQzNS4wMDItLjg2NS0uMDEzLTEuMjk2YTEuNTI4IDEuNTI4IDAgMCAwLS4wNzgtLjMxNS40MDUuNDA1IDAgMCAwLS4wNzEuMjA3Yy0uMDI2LjI5Ni0uMDQ5LjU5MS0uMDc1Ljg4Ni0uMDM4LjQzMi0uMjczLjcxNi0uNjc5LjgxYTEuNzAyIDEuNzAyIDAgMCAxLS4zNy4wNDVjLS41NTcuMDAzLTEuMTE1LS4wMDEtMS42NzMtLjAwNS0uMDQ4IDAtLjEwOS4wMTktLjE0OC0uMDY1LjE3OC0uMTAzLjM3Ny0uMTY4LjU4Mi0uMTg3YTUuNjcgNS42NyAwIDAgMCAuOTM5LS4xOTNjLjQyLS4xMTQuNTIyLS4yNDkuNTEyLS42ODctLjAyMy0uOTMxLS4wOTEtMS44Ni0uMDY5LTIuNzkxLjAwNC0uMTg0LjAwMS0uMzY4LjAwMS0uNTUxYTIuMzg3IDIuMzg3IDAgMCAwLS4wNS4zODUgNDAuMjk5IDQwLjI5OSAwIDAgMS0uMTg2IDIuNjIzYy0uMDUyLjUxMy0uMjk2Ljc0OC0uODA0LjgwNS0uNDQ2LjA1MS0uODg5LjAwMi0xLjMzMi0uMDItLjEwOC0uMDA2LS4yMzQuMDEyLS4zMzktLjA2NC4wNDMtLjA2Ni4xMDYtLjA3LjE2LS4wODcuMzYyLS4xMTUuNzI1LS4yMjQgMS4wODYtLjM0NC4yNDYtLjA4MS4zNS0uMjM1LjM1NS0uNDkyYTIuMjQxIDIuMjQxIDAgMCAwLS4wMDMtLjIzMiA0NS4zMTUgNDUuMzE1IDAgMCAxLS4xMDUtMi4xNDkgNS40ODcgNS40ODcgMCAwIDAtLjAzNS0uNDc4Yy0uMDI0LS4xODgtLjEzMS0uMjg3LS4yOTUtLjI1OC0uNTA1LjA5Mi0uOTktLjAwNi0xLjQ3My0uMTM5LS4wNTktLjAxNi0uMTM0LS4wMDctLjE3OC0uMDg4YS45ODYuOTg2IDAgMCAxIC4yODUtLjA5Yy4yNTUtLjA1Mi41MDctLjEyMS43NTMtLjIwOC4zMTItLjExMi41NjQtLjM0Ny42OTUtLjY1MS4wODktLjIwMy4wNTYtLjMxNy0uMTEyLS4zOTgtMS40MTgtLjY4My0yLjUxMi0xLjczLTMuMzkxLTMuMDE3YTguMTUyIDguMTUyIDAgMCAxLTEuMTIzLTIuNDQ3Yy0uMDY3LS4yNDYtLjE1Ni0uMy0uMzgzLS4yNi0uMzA2LjA1My0uNDAxLjAwNi0uNTM1LS4yNzN2LTMuNDljLjE0NC0uMzAzLjIwNS0uMzQxLjUzNC0uMzI5LjIzNS4wMS4yNDctLjAwNC4zMDktLjI0Mi4zOTYtMS41MDggMS4wODItMi44NjEgMi4xNzEtMy45ODhDNi45IDEuNDIgOC41MjMuNjMxIDEwLjM0LjIwM2MuNDU2LS4xMDguOTIyLS4xNSAxLjM4Ny0uMjAzaC44NTRabTcuOTc0IDguOTQ4YTcuMzQgNy4zNCAwIDAgMC0uMDQ4LS45MzggOC4zNTMgOC4zNTMgMCAwIDAtLjA5OS0uNjVjLS41OTgtMi45NjQtMi4zNDQtNS4wMi01LjA1MS02LjI2OC0xLjU1My0uNzE1LTMuMjEtLjgzNS00Ljg3OC0uNTExLTMuMjQ4LjYzMy01LjM5NiAyLjU4My02LjUzOSA1LjY1Mi0uNDM2IDEuMTczLS40OTUgMi40MDYtLjM3IDMuNjUuMDg3LjkzNS4zMzkgMS44NDYuNzQ1IDIuNjk0LjU4NSAxLjIxMyAxLjQ0NCAyLjIwNyAyLjQ3NyAzLjA1OC4zNDMuMjg2LjcxOS41MjggMS4xMjEuNzE5LjIzNS4xMTEuMjQ3LjEwNS4yNDUtLjE0Ni4wMDYtLjE2LjAwMy0uMzItLjAwOS0uNDgtLjEyNS0xLjAyLS4xNDItMi4wNDUtLjE2OS0zLjA2OWEuMzkyLjM5MiAwIDAgMC0uMTg0LS4zNTNjLS4zODUtLjI2OC0uNzEzLS41OTItLjkyMS0xLjAxOS0uNDc0LS45Ny0uMzcyLTIuMzYxLjgxMy0zLjIxNS4xMzYtLjA5Ny4yMTctLjE5LjE5OC0uMzczYTEuNzI0IDEuNzI0IDAgMCAxIC4wMzEtLjQ0MmMuMTc3LTEuMTg3Ljc0OC0yLjEzOCAxLjcyMi0yLjg0LjY4LS40OTIgMS40NDItLjc3MiAyLjI4Ni0uNzgyLjQ4My0uMDA3Ljk1My4xMSAxLjQxNC4yNDQgMS42MDkuNDY3IDIuODQ2IDIuMDcgMi44NDUgMy42OTdhLjY0LjY0IDAgMCAwIC4yNjguNTY1Yy40NjMuMzcxLjgyMS44My45NDMgMS40MjYuMjIgMS4wNzctLjA4MyAxLjk4Mi0uOTc5IDIuNjM0LS4yNjYuMTk0LS4zNDcuNDA2LS4zMzMuNjk4LjAwMi4wNDcgMCAuMDk1LS4wMDIuMTQybC0uMDYyIDEuNDM5Yy0uMDI1LjU4Ni0uMTM4IDEuMTY1LS4xMTcgMS43NTQuMDA4LjIyMy4wMDYuMjI2LjIwMS4xMjhhNy40NiA3LjQ2IDAgMCAwIDIuMzkzLTEuOTAzYzEuMzItMS41NzcgMi4wNzQtMy4zNzIgMi4wNTktNS41MTFaTTkuMTE3IDEyLjEwMmMxLjQ4OS4wMjEgMi40NDMtMS41NzggMS43MTYtMi44NzlhMS45MzcgMS45MzcgMCAwIDAtMS42OTktLjk5MWMtMS4wOTQtLjAwNC0xLjk1NC44MjItMS45NTggMS44ODEtLjAwNSAxLjE0OC44MTMgMS45ODUgMS45NDEgMS45ODlabTUuNzk0IDBjMS4xMDEuMDAyIDEuOTM1LS44MjMgMS45MzUtMS45MTcgMC0xLjA5MS0uODQ2LTEuOTQ5LTEuOTItMS45NDctMS4wNjQuMDAzLTEuOTQuODY2LTEuOTQzIDEuOTE1LS4wMDMgMS4xMDUuODMxIDEuOTQ4IDEuOTI4IDEuOTQ5Wm0tMS40NzIgMS45MzdjLS4yMDguMTI4LS40MDcuMjc3LS42My4zODQtLjUzNi4yNTctMS4wNjMuMjU3LTEuNTc5LS4wNDgtLjE1OC0uMDk0LS4zMDgtLjIwMS0uNDY0LS4yOTgtLjA0Ny0uMDI4LS4wOTItLjEwMy0uMTUtLjA2Mi0uMDQ0LjAzLS4wMS4xLS4wMDEuMTUxLjAzNy4xNzkuMDY0LjM2Mi4wODIuNTQ0LjAyNy41NjUuMjkzLjk5Mi43NDIgMS4zMWEuOTg0Ljk4NCAwIDAgMCAuNzkxLjE4NmMuNTY1LS4xMTkgMS4wMjUtLjYxNCAxLjEyNC0xLjIxOC4wNDMtLjI2Ni4wMDUtLjU0NC4xMDktLjgwM2EuMTMzLjEzMyAwIDAgMC0uMDI0LS4xNDZabS04Ljc4LTQuOTJjLS4wMTItMS4xMDIuMTQzLTIuMDU1LjU0LTIuOTYxLjYzMy0xLjQ0MyAxLjY0Mi0yLjU1MyAyLjk4LTMuMzc0YS4zNzguMzc4IDAgMCAxIC40NTkuMDY3Yy4wNi4wNi4wMzYuMTE4LjAxLjE3OGExLjA5IDEuMDkgMCAwIDEtLjQ4LjUxYy0xLjA3OS42MzktMS44MjkgMS41NzEtMi4zNTcgMi42ODhhNi4zMjUgNi4zMjUgMCAwIDAtLjYxOCAyLjk4NmMuMDU1IDEuMzA5LjQzOSAyLjUxNiAxLjIxMyAzLjU4OC4wODguMTA0LjE0OC4yMy4xNzMuMzY1LjAxLjA4LjA1OS4xNjgtLjAzMS4yMjhhLjMxMi4zMTIgMCAwIDEtLjI4OC4wNDEuNTAyLjUwMiAwIDAgMS0uMjM0LS4xODVjLS43Mi0uOTc5LTEuMTkzLTIuMDU2LTEuMzMxLTMuMjczLS4wMzYtLjMyNi0uMDA0LS42NTMtLjAzNi0uODU4Wk04Ljk0IDIuMzRhLjM3My4zNzMgMCAwIDEgLjM3OC0uMzgyYy4yMTEuMDAxLjQwOS4yMjYuNDE2LjQ3My4wMDQuMTM4LS4zMDkuMzktLjQ3Ni4zODYtLjE4OS0uMDA1LS4zMTgtLjItLjMxOC0uNDc3Wm0tLjQ2NSA3LjQ4YS42MDkuNjA5IDAgMCAxIC41ODYtLjYzMWMuMzgtLjAwMy42NzEuMjcxLjY3NS42MzMuMDA0LjM1Ni0uMjcuNjIyLS42MzkuNjIxLS4zOC0uMDAyLS42MjEtLjI0MS0uNjIyLS42MjNabTYuNDk2LjYyM2MtLjM4MS0uMDAyLS42MjUtLjI1NS0uNjIxLS42NDZhLjYzNS42MzUgMCAwIDEgLjU5Ni0uNjEzLjY1Ni42NTYgMCAwIDEgLjY2OS42NDNjLjAwMS4zNTQtLjI3NS42MTgtLjY0NC42MTZaIi8+PC9zdmc+" x="1551" y="209" width="32" height="32" preserveAspectRatio="xMidYMid meet"/>
-<text x="1598" y="220" class="label">ArgoCD</text>
+<text x="1598" y="220" class="label" font-weight="800">ArgoCD</text>
 <text x="1598" y="242" class="body">automated sync</text>
 <text x="1598" y="260" class="body">exact revision</text>
 <rect x="560" y="306" width="240" height="64" rx="18" class="box" filter="url(#shadow)"/>
@@ -227,6 +233,13 @@
 <rect x="1570" y="590" width="620" height="280" rx="20" class="inner"/>
 <text x="1592" y="618" class="subsection">dev namespace</text>
 <text x="1592" y="640" class="small">application workloads, data services, observability, ingress targets</text>
+<rect x="1582" y="650" width="596" height="88" rx="14" fill="#f8fbff" opacity="0.55"/>
+<rect x="1582" y="740" width="596" height="88" rx="14" fill="#f8fbff" opacity="0.55"/>
+<rect x="1582" y="830" width="596" height="146" rx="14" fill="#f8fbff" opacity="0.55"/>
+<text x="1600" y="664" class="micro">Application layer</text>
+<text x="1600" y="754" class="micro">Data / secrets layer</text>
+<text x="1600" y="844" class="micro">Observability layer</text>
+
 <rect x="1590" y="666" width="180" height="64" rx="18" class="inner"/>
 <rect x="1590" y="666" width="180" height="5" rx="5" fill="#2563eb"/>
 <rect x="1604" y="680" width="36" height="36" rx="10" fill="#f8fbff" stroke="#d8e2f0" stroke-width="1.2"/>
@@ -299,14 +312,14 @@
 <rect x="612" y="952" width="220" height="5" rx="5" fill="#0ea5e9"/>
 <rect x="626" y="966" width="36" height="36" rx="10" fill="#f8fbff" stroke="#d8e2f0" stroke-width="1.2"/>
 <image href="data:image/svg+xml;base64,PHN2ZyByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+TkdJTlg8L3RpdGxlPjxwYXRoIGQ9Ik0xMiAwTDEuNjA1IDZ2MTJMMTIgMjRsMTAuMzk1LTZWNkwxMiAwem02IDE2LjU5YzAgLjcwNS0uNjQ2IDEuMjktMS41MjkgMS4yOS0uNjMxIDAtMS4zNTEtLjI1NS0xLjgwMS0uODFsLTYtNy4xNDF2Ni42NmMwIC43MjEtLjU3IDEuMjktMS4yNzQgMS4yOUg3LjMyYy0uNzIxIDAtMS4yOS0uNi0xLjI5LTEuMjlWNy40MWMwLS43MDUuNjMtMS4yOSAxLjUtMS4yOS42NDYgMCAxLjM4LjI1NSAxLjgzLjgxbDUuOTcgNy4xNDFWNy40MWMwLS43MjEuNi0xLjI5IDEuMjktMS4yOWguMDc1Yy43MiAwIDEuMjkuNiAxLjI5IDEuMjl2OS4xOEgxOHoiLz48L3N2Zz4=" x="630" y="970" width="28" height="28" preserveAspectRatio="xMidYMid meet"/>
-<text x="670" y="980" class="label">ingress-nginx namespace</text>
+<text x="670" y="980" class="label" font-weight="800">ingress-nginx namespace</text>
 <text x="670" y="1002" class="micro">controller</text>
 <text x="670" y="1017" class="micro">LoadBalancer 172.18.0.2</text>
 <rect x="850" y="952" width="700" height="68" rx="18" class="inner"/>
 <rect x="850" y="952" width="700" height="5" rx="5" fill="#0ea5e9"/>
 <rect x="864" y="966" width="36" height="36" rx="10" fill="#f8fbff" stroke="#d8e2f0" stroke-width="1.2"/>
 <image href="data:image/svg+xml;base64,PHN2ZyByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+TkdJTlg8L3RpdGxlPjxwYXRoIGQ9Ik0xMiAwTDEuNjA1IDZ2MTJMMTIgMjRsMTAuMzk1LTZWNkwxMiAwem02IDE2LjU5YzAgLjcwNS0uNjQ2IDEuMjktMS41MjkgMS4yOS0uNjMxIDAtMS4zNTEtLjI1NS0xLjgwMS0uODFsLTYtNy4xNDF2Ni42NmMwIC43MjEtLjU3IDEuMjktMS4yNzQgMS4yOUg3LjMyYy0uNzIxIDAtMS4yOS0uNi0xLjI5LTEuMjlWNy40MWMwLS43MDUuNjMtMS4yOSAxLjUtMS4yOS42NDYgMCAxLjM4LjI1NSAxLjgzLjgxbDUuOTcgNy4xNDFWNy40MWMwLS43MjEuNi0xLjI5IDEuMjktMS4yOWguMDc1Yy43MiAwIDEuMjkuNiAxLjI5IDEuMjl2OS4xOEgxOHoiLz48L3N2Zz4=" x="868" y="970" width="28" height="28" preserveAspectRatio="xMidYMid meet"/>
-<text x="908" y="980" class="label">leninkart-ingress</text>
+<text x="908" y="980" class="label" font-weight="800">leninkart-ingress</text>
 <text x="908" y="1002" class="micro">/ -&gt; frontend | /auth + /api/products -&gt; product-service | /api/orders -&gt; order-service</text>
 <rect x="1570" y="952" width="600" height="68" rx="18" class="inner"/>
 <rect x="1570" y="952" width="600" height="5" rx="5" fill="#2563eb"/>
@@ -356,6 +369,11 @@
 <circle cx="525" cy="214" r="15" class="flow"/>
 <text x="525" y="218" class="flowtext" text-anchor="middle">3</text>
 <path d="M730 238 L760 238" class="arrow"/>
+
+<path d="M845 286 C 845 336, 735 334, 730 306" class="safety"/>
+<text x="744" y="334" class="small">safety / rollback path</text>
+<text x="610" y="176" class="small">Primary deployment path</text>
+
 <circle cx="745" cy="216" r="15" class="flow"/>
 <text x="745" y="220" class="flowtext" text-anchor="middle">4</text>
 <path d="M930 238 L960 238" class="arrow"/>
