@@ -5,9 +5,31 @@ This folder contains the presentation-oriented architecture diagrams for the cur
 ## Files
 
 - `leninkart-platform-architecture.puml`
+- `leninkart-platform-architecture.drawio`
 - `leninkart-platform-architecture.png`
 - `deployment-flow.puml`
+- `deployment-flow.drawio`
 - `deployment-flow.png`
+
+
+## Source Of Truth
+
+The file ownership model is intentional:
+
+- `*.puml` is the canonical architecture source of truth
+- `*.drawio` is the editable presentation layer derived from the PlantUML structure
+- `*.png` is the exported presentation asset used in the README and other showcase material
+
+The draw.io versions should stay semantically aligned with the PlantUML diagrams. Layout, spacing, grouping polish, and label readability can improve in draw.io, but architecture meaning should not diverge there.
+
+## Presentation Usage
+
+The PNG files in this folder are the presentation-facing exports currently used in the GitHub README. They were refined for:
+
+- clean layered grouping
+- readable labels at GitHub scale
+- balanced spacing for screenshots and social sharing
+- a layout that remains faithful to the implemented system
 
 ## Diagram Scope
 
