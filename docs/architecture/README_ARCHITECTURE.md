@@ -5,6 +5,7 @@ This folder contains the corrected technical and presentation architecture diagr
 ## Source Of Truth
 
 - `leninkart-platform-architecture.puml`
+- `leninkart-platform-architecture-detailed.puml`
 - `deployment-flow.puml`
 
 PlantUML is the canonical technical source for architecture meaning.
@@ -13,6 +14,8 @@ PlantUML is the canonical technical source for architecture meaning.
 
 - `leninkart-platform-architecture-linkedin.drawio`
 - `leninkart-platform-architecture-linkedin.png`
+- `leninkart-platform-architecture-detailed.drawio`
+- `leninkart-platform-architecture-detailed.png`
 - `deployment-flow-linkedin.drawio`
 - `deployment-flow-linkedin.png`
 
@@ -31,7 +34,8 @@ The current diagrams now reflect these verified implementation facts:
 
 ## Diagram Intent
 
-- `leninkart-platform-architecture.*` focuses on runtime and boundary correctness
+- `leninkart-platform-architecture.*` is the simpler high-level boundary view
+- `leninkart-platform-architecture-detailed.*` is the expanded component view for apps, platform support, observability, Docker Compose Kafka, and proof tooling
 - `deployment-flow.*` focuses on the Jira -> GitHub Actions -> runner -> GitOps -> ArgoCD control path
 
 The diagrams intentionally do not show unimplemented Jira webhook auto-trigger behavior.

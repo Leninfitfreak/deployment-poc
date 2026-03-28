@@ -81,6 +81,18 @@ The focused deployment path is:
 
 `Jira ticket -> workflow_dispatch -> self-hosted runner -> deployment-poc -> leninkart-infra/dev -> ArgoCD -> Synced + Healthy -> Jira feedback`
 
+### Detailed Platform Architecture
+
+![LeninKart detailed platform architecture](docs/architecture/leninkart-platform-architecture-detailed.png)
+
+Use the detailed view when you want the real component inventory rather than the higher-level boundary overview. It expands:
+
+- application workloads
+- platform support components
+- observability runtime components
+- Docker Compose Kafka placement
+- validation/proof as a separate observer layer
+
 ## Repositories Involved
 
 | Repo / workspace | Branch | Current role |
