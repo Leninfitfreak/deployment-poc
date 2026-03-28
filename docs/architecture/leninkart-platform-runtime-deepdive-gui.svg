@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="2280" height="1480" viewBox="0 0 2280 1480">
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="2280" height="1480" viewBox="0 0 2280 1480">
 
 <defs>
   <linearGradient id="bgfade" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#f7faff"/></linearGradient>
@@ -11,9 +11,7 @@
   <marker id="teleArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#95a4ba"/></marker><marker id="safetyArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#b45309"/></marker>
 </defs>
 <rect width="100%" height="100%" fill="url(#bgfade)"/>
-<text x="36" y="54" class="title">LeninKart Runtime &amp; Infra Deep Dive</text>
-<text x="36" y="82" class="subtitle">Refined deep-dive view with cleaner control-plane spacing, consistent arrow semantics, and stronger namespace clarity</text>
-<text x="36" y="108" class="section">Jira-driven GitOps deployment platform with safety controls, runtime observability, and browser-based evidence.</text>
+<text x="36" y="54" class="title">LeninKart Platform Architecture</text>
 <rect x="40" y="130" width="470" height="228" rx="24" class="groupBlue"/>
 <rect x="530" y="118" width="710" height="270" rx="24" class="groupMint"/>
 <rect x="40" y="388" width="470" height="250" rx="24" class="groupLav"/>
@@ -127,8 +125,8 @@
 <rect x="86" y="754" width="42" height="42" rx="12" fill="#f8fbff" stroke="#d8e2f0" stroke-width="1.5"/>
 <image href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHJlY3QgeD0iNSIgeT0iNCIgd2lkdGg9IjE0IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzBlYTVlOSIvPjxyZWN0IHg9IjgiIHk9IjIiIHdpZHRoPSI4IiBoZWlnaHQ9IjQiIHJ4PSIxIiBmaWxsPSIjMzhiZGY4Ii8+PHBhdGggZD0iTTggMTBoOE04IDEzaDhNOCAxNmg1IiBzdHJva2U9IiNlMGYyZmUiIHN0cm9rZS13aWR0aD0iMS42IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=" x="91" y="759" width="32" height="32" preserveAspectRatio="xMidYMid meet"/>
 <text x="138" y="770" class="label">project-validation</text>
-<text x="138" y="792" class="body">observer-only</text>
-<text x="138" y="810" class="body">validation layer</text>
+<text x="138" y="792" class="body">read-only observer</text>
+<text x="138" y="810" class="body">validation proof</text>
 <rect x="265" y="740" width="120" height="94" rx="18" class="box" filter="url(#shadow)"/>
 <rect x="265" y="740" width="120" height="6" rx="6" fill="#38bdf8"/>
 <rect x="281" y="754" width="42" height="42" rx="12" fill="#f8fbff" stroke="#d8e2f0" stroke-width="1.5"/>
@@ -142,7 +140,7 @@
 <image href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHJlY3QgeD0iNSIgeT0iNCIgd2lkdGg9IjE0IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzBlYTVlOSIvPjxyZWN0IHg9IjgiIHk9IjIiIHdpZHRoPSI4IiBoZWlnaHQ9IjQiIHJ4PSIxIiBmaWxsPSIjMzhiZGY4Ii8+PHBhdGggZD0iTTggMTBoOE04IDEzaDhNOCAxNmg1IiBzdHJva2U9IiNlMGYyZmUiIHN0cm9rZS13aWR0aD0iMS42IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=" x="421" y="759" width="32" height="32" preserveAspectRatio="xMidYMid meet"/>
 <text x="468" y="770" class="label">Reports &amp; Evidence</text>
 <text x="468" y="792" class="body">MkDocs</text>
-<text x="468" y="810" class="body">evidence index</text>
+<text x="468" y="810" class="body">evidence docs</text>
 <rect x="70" y="852" width="430" height="30" rx="18" class="box" filter="url(#shadow)"/>
 <rect x="70" y="852" width="430" height="6" rx="6" fill="#64748b"/>
 <rect x="86" y="866" width="42" height="42" rx="12" fill="#f8fbff" stroke="#d8e2f0" stroke-width="1.5"/>
@@ -244,7 +242,7 @@
 <rect x="1590" y="666" width="180" height="5" rx="5" fill="#2563eb"/>
 <rect x="1604" y="680" width="36" height="36" rx="10" fill="#f8fbff" stroke="#d8e2f0" stroke-width="1.2"/>
 <image href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHJlY3QgeD0iMyIgeT0iNCIgd2lkdGg9IjE4IiBoZWlnaHQ9IjE0IiByeD0iMiIgZmlsbD0iIzI1NjNlYiIvPjxyZWN0IHg9IjUiIHk9IjYiIHdpZHRoPSIxNCIgaGVpZ2h0PSIzIiBmaWxsPSIjOTNjNWZkIi8+PHJlY3QgeD0iNSIgeT0iMTEiIHdpZHRoPSI2IiBoZWlnaHQ9IjUiIGZpbGw9IiNkYmVhZmUiLz48cmVjdCB4PSIxMyIgeT0iMTEiIHdpZHRoPSI2IiBoZWlnaHQ9IjUiIGZpbGw9IiNiZmRiZmUiLz48cmVjdCB4PSI4IiB5PSIyMCIgd2lkdGg9IjgiIGhlaWdodD0iMS44IiByeD0iMC44IiBmaWxsPSIjMWUzYThhIi8+PC9zdmc+" x="1608" y="684" width="28" height="28" preserveAspectRatio="xMidYMid meet"/>
-<text x="1648" y="694" class="label">frontend-dev</text>
+<text x="1648" y="694" class="label">frontend \(dev\)</text>
 <text x="1648" y="716" class="micro">Deployment</text>
 <text x="1648" y="731" class="micro">service: leninkart-frontend</text>
 <rect x="1785" y="666" width="190" height="64" rx="18" class="inner"/>
@@ -357,7 +355,7 @@
 <rect x="1884" y="1124" width="286" height="5" rx="5" fill="#3b82f6"/>
 <rect x="1898" y="1138" width="36" height="36" rx="10" fill="#f8fbff" stroke="#d8e2f0" stroke-width="1.2"/>
 <image href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHJlY3QgeD0iNSIgeT0iNCIgd2lkdGg9IjE0IiBoZWlnaHQ9IjE2IiByeD0iMiIgZmlsbD0iIzBlYTVlOSIvPjxyZWN0IHg9IjgiIHk9IjIiIHdpZHRoPSI4IiBoZWlnaHQ9IjQiIHJ4PSIxIiBmaWxsPSIjMzhiZGY4Ii8+PHBhdGggZD0iTTggMTBoOE04IDEzaDhNOCAxNmg1IiBzdHJva2U9IiNlMGYyZmUiIHN0cm9rZS13aWR0aD0iMS42IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=" x="1902" y="1142" width="28" height="28" preserveAspectRatio="xMidYMid meet"/>
-<text x="1942" y="1152" class="label">proof targets</text>
+<text x="1942" y="1152" class="label">Proof Targets</text>
 <text x="1942" y="1174" class="micro">GitHub UI / Git commit UI / ArgoCD UI / app UI</text>
 <path d="M180 236 L195 236" class="arrow"/>
 <circle cx="188" cy="214" r="15" class="flow"/>
@@ -394,10 +392,7 @@
 <path d="M1220 286 L1220 590" class="arrow"/>
 <path d="M850 286 L850 306" class="arrow"/>
 <path d="M950 286 L950 306" class="arrow"/>
-<path d="M250 788 C 620 788, 980 470, 1530 238" class="proof"/>
-<path d="M385 788 C 720 788, 1080 1040, 1884 1158" class="proof"/>
-<path d="M385 788 C 760 788, 1500 952, 1720 952" class="proof"/>
-<path d="M980 238 C 760 238, 620 238, 500 788" class="proof"/>
+<path d="M250 788 C 760 788, 1160 980, 1884 1158" class="proof"/>
 <path d="M500 596 C 900 596, 1150 1158, 1566 1158" class="tele"/>
 <path d="M1770 854 C 1760 980, 820 1158, 930 1158" class="tele"/>
 <path d="M1975 854 C 1975 980, 1140 1158, 1248 1158" class="tele"/>
