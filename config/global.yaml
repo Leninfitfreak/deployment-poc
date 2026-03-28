@@ -46,3 +46,10 @@ jira_feedback:
     failure: true
     noop: true
   require_transition_success: false
+version_resolution:
+  latest_aliases:
+    default:
+      - latest
+    by_env:
+      dev:
+        - latest-dev

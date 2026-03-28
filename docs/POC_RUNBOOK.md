@@ -28,7 +28,7 @@ workflow:
 app: leninkart
 component: product-service
 env: dev
-version: 23599211809
+version: latest-dev
 url: http://dev.leninkart.local/api/products
 ```
 
@@ -36,8 +36,9 @@ url: http://dev.leninkart.local/api/products
 
 `version` can be either:
 
+- `latest` or `latest-dev`, resolved from `config/latest_tags.yaml`
+- a Jira-friendly release alias resolved through `config/app_mapping.yaml`
 - a literal deployable image tag
-- a Jira-friendly release alias that is resolved through `config/app_mapping.yaml`
 
 Currently validated LeninKart dev aliases:
 
@@ -63,6 +64,7 @@ Currently validated LeninKart dev aliases:
 ## Config Files
 
 - `config/global.yaml`
+- `config/latest_tags.yaml`
 - `config/projects.yaml`
 - `config/app_mapping.yaml`
 - `config/environments.yaml`
@@ -71,7 +73,11 @@ Currently validated LeninKart dev aliases:
 - `config/deployment_state.yaml`
 - `config/deploy_locks.yaml`
 
-These files are the only supported place for project, environment, runner, repo, and version alias changes.
+These files are the only supported place for project, environment, runner, repo, latest-tag metadata, and version alias changes.
+
+Reference:
+
+- [LATEST_TAG_RESOLUTION.md](/D:/Projects/Services/deployment-poc/docs/LATEST_TAG_RESOLUTION.md)
 
 ## Jira Status And Comment Automation
 

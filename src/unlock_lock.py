@@ -22,6 +22,8 @@ def build_target(configs: dict, component: str, environment: str) -> dict:
         configs["projects"],
         configs["app_mapping"],
         configs["environments"],
+        configs["global"],
+        configs["latest_tags"],
     )
 
 

@@ -4,11 +4,12 @@ Reusable Jira-driven deployment orchestration for the LeninKart dev platform, bu
 
 ## Why This Project Exists
 
-This repository exists to demonstrate a practical deployment control plane that starts from a Jira ticket and drives a real GitOps-based deployment flow without embedding deployment logic inside the application repos.
+This repository exists to demonstrate a practical deployment control plane that starts from a Jira ticket and drives a real GitOps-based deployment flow while keeping deployment ownership separate from the application repositories.
 
 It solves a few concrete problems:
 
 - deployment intent is captured in Jira instead of being passed around informally
+- service CI stays focused on build, test, image publish, and latest-tag metadata publish
 - deployment logic stays separate from application source code
 - GitOps remains the source of truth through `leninkart-infra`
 - ArgoCD reconciliation is verified against the exact pushed revision
@@ -116,29 +117,33 @@ These are mapped in [config/app_mapping.yaml](config/app_mapping.yaml) through:
 - environment URLs
 - version aliases such as `v1` and `v2`
 
+The latest built image tags for normal deployments are tracked in [config/latest_tags.yaml](config/latest_tags.yaml), and the version resolution model is documented in [docs/LATEST_TAG_RESOLUTION.md](docs/LATEST_TAG_RESOLUTION.md).
+
 Live multi-service validation is documented in [docs/POC_MULTI_SERVICE_VALIDATION_REPORT.md](docs/POC_MULTI_SERVICE_VALIDATION_REPORT.md).
 
 ## End-to-End Deployment Flow
 
-1. A Jira ticket is created with deployment metadata in the description.
-2. GitHub Actions `workflow_dispatch` starts `.github/workflows/deploy-from-jira.yml`.
-3. The job lands on the Windows self-hosted runner with labels:
+1. A service repo CI run can build, test, push the image, and publish latest-tag metadata for its environment.
+2. A Jira ticket is created with deployment metadata in the description.
+3. GitHub Actions `workflow_dispatch` starts `.github/workflows/deploy-from-jira.yml`.
+4. The job lands on the Windows self-hosted runner with labels:
    - `self-hosted`
    - `Windows`
    - `X64`
    - `leninkart`
    - `local`
    - `dev`
-4. `deployment-poc` fetches the Jira issue through the Jira API.
-5. The ticket description is parsed into structured deployment metadata.
-6. Validation checks the environment, component, version, and target mapping.
-7. The orchestrator resolves the GitOps target in `leninkart-infra/dev`.
-8. A deployment lock is acquired.
-9. The target `values-dev.yaml` file is updated and committed when a new deployment is needed.
-10. ArgoCD reconciliation is verified against the exact GitOps commit.
-11. Post-checks run, including URL validation with a localhost host-header fallback when needed.
-12. Jira receives stage-wise progress comments and final status/comment feedback.
-13. Deployment state is updated only after a verified successful deployment outcome.
+5. `deployment-poc` fetches the Jira issue through the Jira API.
+6. The ticket description is parsed into structured deployment metadata.
+7. Validation checks the environment, component, version, and target mapping.
+8. The orchestrator resolves the GitOps target in `leninkart-infra/dev`.
+9. The requested version is resolved as `latest`, `latest-dev`, an app alias such as `v1` or `v2`, or an explicit image tag.
+10. A deployment lock is acquired.
+11. The target `values-dev.yaml` file is updated and committed when a new deployment is needed.
+12. ArgoCD reconciliation is verified against the exact GitOps commit.
+13. Post-checks run, including URL validation with a localhost host-header fallback when needed.
+14. Jira receives stage-wise progress comments and final status/comment feedback.
+15. Deployment state is updated only after a verified successful deployment outcome.
 
 ## Deployment Hardening Features
 
@@ -256,6 +261,7 @@ deployment-poc/
     unlock-deployment-lock.yml
   config/
     global.yaml
+    latest_tags.yaml
     projects.yaml
     app_mapping.yaml
     environments.yaml
@@ -292,7 +298,7 @@ Dispatch the workflow manually from GitHub Actions or run the orchestrator local
 app: leninkart
 component: product-service
 env: dev
-version: v1
+version: latest-dev
 url: http://dev.leninkart.local/api/products
 ```
 
@@ -317,6 +323,10 @@ Required secrets:
 - `INFRA_PAT`
 - `ARGOCD_SERVER`
 - `ARGOCD_AUTH_TOKEN`
+
+Version resolution reference:
+
+- [docs/LATEST_TAG_RESOLUTION.md](docs/LATEST_TAG_RESOLUTION.md)
 
 ### Local Test Mode
 

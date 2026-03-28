@@ -43,8 +43,13 @@ def build_final_jira_comment(result: dict) -> str:
         f"Environment: {target.get('environment', '')}",
         f"Requested version: {target.get('requested_version', '')}",
         f"Resolved deployable version: {target.get('resolved_version', '')}",
+        f"Version source: {target.get('version_source', '')}",
         f"Deployment action: {result.get('deployment_action', '')}",
     ]
+    if target.get("image_repository"):
+        lines.append(f"Image repository: {target.get('image_repository', '')}")
+    if target.get("latest_tag_updated_at"):
+        lines.append(f"Latest tag metadata updated at: {target.get('latest_tag_updated_at', '')}")
     if result.get("gitops_commit"):
         lines.append(f"GitOps commit SHA: {result.get('gitops_commit', '')}")
     if result.get("changed_file"):
@@ -127,6 +132,8 @@ class JiraProgressReporter:
             lines.append(f"Requested version: {context.get('requested_version')}")
         if context.get("resolved_version"):
             lines.append(f"Resolved version: {context.get('resolved_version')}")
+        if target.get("version_source"):
+            lines.append(f"Version source: {target.get('version_source', '')}")
         if target.get("argocd_app"):
             lines.append(f"ArgoCD application: {target.get('argocd_app', '')}")
         if context.get("gitops_commit"):

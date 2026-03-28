@@ -51,6 +51,8 @@ def write_reports(root: Path, result: dict) -> None:
                 f"- Requested version: `{target.get('requested_version', '')}`",
                 f"- Resolved version: `{target.get('resolved_version', '')}`",
                 f"- Effective version: `{target.get('effective_version', '')}`",
+                f"- Version source: `{target.get('version_source', '')}`",
+                f"- Version reference: `{target.get('version_reference', '')}`",
                 f"- GitOps repo: `{target.get('gitops_repo', '')}`",
                 f"- GitOps branch: `{target.get('gitops_branch', '')}`",
                 f"- Values path: `{target.get('values_path', '')}`",
@@ -58,6 +60,10 @@ def write_reports(root: Path, result: dict) -> None:
                 f"- Namespace: `{target.get('namespace', '')}`",
             ]
         )
+        if target.get("image_repository"):
+            markdown.append(f"- Image repository: `{target.get('image_repository', '')}`")
+        if target.get("latest_tag_updated_at"):
+            markdown.append(f"- Latest tag metadata updated at: `{target.get('latest_tag_updated_at', '')}`")
         if target.get("rollback_source_version"):
             markdown.append(f"- Rollback source version: `{target.get('rollback_source_version', '')}`")
 

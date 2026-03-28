@@ -25,6 +25,7 @@ def load_configs(root: Path) -> dict:
         "projects": read_yaml(config_dir / "projects.yaml"),
         "app_mapping": read_yaml(config_dir / "app_mapping.yaml"),
         "environments": read_yaml(config_dir / "environments.yaml"),
+        "latest_tags": read_yaml(config_dir / "latest_tags.yaml"),
         "jira_field_mapping": read_yaml(config_dir / "jira_field_mapping.yaml"),
         "global": read_yaml(config_dir / "global.yaml"),
         "policy": read_yaml(config_dir / "deployment_policy.yaml"),
@@ -84,7 +85,14 @@ def main() -> int:
                 "detail": "Jira metadata parsed and validated successfully.",
             },
         )
-        target = resolve_target(metadata, configs["projects"], configs["app_mapping"], configs["environments"])
+        target = resolve_target(
+            metadata,
+            configs["projects"],
+            configs["app_mapping"],
+            configs["environments"],
+            configs["global"],
+            configs["latest_tags"],
+        )
         validate_target(target)
         validate_version_resolution(target)
         jira_progress_reporter.publish_stage(

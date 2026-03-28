@@ -1,0 +1,22 @@
+﻿services:
+  frontend:
+    dev:
+      latest: "23599512080"
+      image: "leninfitfreak/frontend"
+      updated_at: "2026-03-28T00:00:00Z"
+      source_repo: "Leninfitfreak/leninkart-frontend"
+      source_branch: "dev"
+  product-service:
+    dev:
+      latest: "23599512382"
+      image: "leninfitfreak/product-service"
+      updated_at: "2026-03-28T00:00:00Z"
+      source_repo: "Leninfitfreak/leninkart-product-service"
+      source_branch: "dev"
+  order-service:
+    dev:
+      latest: "23599512459"
+      image: "leninfitfreak/order-service"
+      updated_at: "2026-03-28T00:00:00Z"
+      source_repo: "Leninfitfreak/leninkart-order-service"
+      source_branch: "dev"

@@ -3,7 +3,14 @@ from __future__ import annotations
 from .utils import PocError
 
 
-def resolve_target(metadata: dict[str, str], projects: dict, app_mapping: dict, environments: dict) -> dict:
+def resolve_target(
+    metadata: dict[str, str],
+    projects: dict,
+    app_mapping: dict,
+    environments: dict,
+    global_config: dict,
+    latest_tags: dict,
+) -> dict:
     requested = metadata["app"].strip().lower()
     component = metadata.get("component", "").strip().lower()
     env = metadata["env"]
@@ -13,7 +20,8 @@ def resolve_target(metadata: dict[str, str], projects: dict, app_mapping: dict, 
     project_key = app_cfg["project"]
     project_cfg = projects["projects"][project_key]
     requested_version = metadata["version"]
-    resolved_version = _resolve_version(requested_version, app_cfg, env)
+    version_resolution = _resolve_version(requested_version, app_key, app_cfg, env, global_config, latest_tags)
+    resolved_version = version_resolution["resolved_version"]
 
     return {
         "project_key": project_key,
@@ -30,6 +38,11 @@ def resolve_target(metadata: dict[str, str], projects: dict, app_mapping: dict, 
         "namespace": app_cfg["namespace_by_env"][env],
         "cluster_context": environments["environments"][env]["cluster_context"],
         "requires_argocd_verification": environments["environments"][env].get("requires_argocd_verification", False),
+        "version_source": version_resolution["source"],
+        "version_reference": version_resolution["reference"],
+        "image_repository": version_resolution.get("image_repository", ""),
+        "latest_tag_updated_at": version_resolution.get("updated_at", ""),
+        "latest_tag_environment": version_resolution.get("metadata_environment", ""),
     }
 
 
@@ -58,6 +71,49 @@ def _resolve_app_key(requested: str, component: str, projects: dict, app_mapping
     return default_app
 
 
-def _resolve_version(requested_version: str, app_cfg: dict, env: str) -> str:
+def _resolve_version(
+    requested_version: str,
+    app_key: str,
+    app_cfg: dict,
+    env: str,
+    global_config: dict,
+    latest_tags: dict,
+) -> dict:
+    normalized_version = str(requested_version).strip()
+    latest_aliases_cfg = (global_config.get("version_resolution", {}) or {}).get("latest_aliases", {}) or {}
+    latest_aliases = set(latest_aliases_cfg.get("default", []) or [])
+    latest_aliases.update((latest_aliases_cfg.get("by_env", {}) or {}).get(env, []) or [])
+
+    if normalized_version in latest_aliases:
+        env_payload = ((latest_tags.get("services", {}) or {}).get(app_key, {}) or {}).get(env, {}) or {}
+        latest_value = str(env_payload.get("latest", "")).strip()
+        if not latest_value:
+            raise PocError(f"No latest tag metadata found for {app_key} in env '{env}'")
+        return {
+            "resolved_version": latest_value,
+            "source": "latest_tag_metadata",
+            "reference": normalized_version,
+            "image_repository": str(env_payload.get("image", "")).strip(),
+            "updated_at": str(env_payload.get("updated_at", "")).strip(),
+            "metadata_environment": env,
+        }
+
     aliases = app_cfg.get("version_aliases_by_env", {}).get(env, {})
-    return str(aliases.get(requested_version, requested_version))
+    if normalized_version in aliases:
+        return {
+            "resolved_version": str(aliases[normalized_version]),
+            "source": "app_mapping_alias",
+            "reference": normalized_version,
+            "image_repository": "",
+            "updated_at": "",
+            "metadata_environment": env,
+        }
+
+    return {
+        "resolved_version": normalized_version,
+        "source": "explicit_tag",
+        "reference": normalized_version,
+        "image_repository": "",
+        "updated_at": "",
+        "metadata_environment": env,
+    }
