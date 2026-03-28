@@ -1,68 +1,93 @@
 @startuml
 title LeninKart Platform Architecture
+
 skinparam backgroundColor white
 skinparam shadowing false
 skinparam defaultFontName Segoe UI
 skinparam packageStyle rectangle
-skinparam rectangle { RoundCorner 12 }
-skinparam package { BorderColor #475569; FontStyle bold }
+skinparam rectangle {
+  RoundCorner 12
+}
+skinparam package {
+  BorderColor #4b5563
+}
 skinparam ArrowColor #334155
-skinparam ArrowThickness 1.4
-skinparam linetype ortho
+skinparam ArrowThickness 1.2
+
 legend right
-  Verified current model:
-  - ArgoCD runs inside the k3d Kubernetes cluster
-  - App workloads, platform support, and observability runtime are in-cluster
-  - Kafka runs outside Kubernetes via Docker Compose
-  - observability-stack/bootstrap is outside the cluster
-  - deployment-poc runs in the self-hosted runner path
-  - project-validation is observer-only
+  Current validated scope:
+  - Jira-driven deployment request
+  - GitHub Actions on self-hosted runner
+  - GitOps via leninkart-infra/dev
+  - ArgoCD on k3d-leninkart-dev
+  - frontend, product-service, order-service
+  - project-validation browser proof
 endlegend
-package "External Control & Source Repos" as external {
+
+package "Request & Control" as control {
   actor "Operator" as operator
-  rectangle "Jira Cloud\nmanual deployment request" as jira
-  rectangle "GitHub Actions\nworkflow_dispatch" as gha
-  rectangle "leninkart-infra\nGitOps repo / dev branch" as infra
+  rectangle "Jira Ticket\nSCRUM-* deployment request" as jira
+  rectangle "GitHub Actions\nworkflow_dispatch\nDeploy From Jira" as gha
+  rectangle "Self-hosted Runner\nleninkart-runner\nWindows / local / dev" as runner
 }
-package "Local Execution & Bootstrap" as exec {
-  rectangle "Self-hosted Runner\nWindows / local / dev" as runner
-  rectangle "deployment-poc\norchestrator + safety layer" as poc
-  rectangle "observability-stack/bootstrap\ngenerates observability values" as obsboot
+
+package "Orchestration & Safety" as orchestration {
+  rectangle "deployment-poc\norchestrator" as poc
+  rectangle "Config Mapping\nprojects / apps /\nenvironments / jira fields" as config
+  rectangle "Safety Layer\nstate + locks + stale-lock recovery\n+ idempotency + rollback scaffolding" as safety
+  rectangle "Jira Feedback\nprogress comments\n+ final transitions/comments" as feedback
 }
-package "Local Docker Host" as host {
-  package "k3d-leninkart-dev Kubernetes Cluster" as cluster {
-    rectangle "ArgoCD\nargocd namespace" as argocd
-    rectangle "Application Workloads\nfrontend\nproduct-service\norder-service" as apps
-    rectangle "Platform Support\ningress\nPostgres\nVault\nExternal Secrets\nloadtest" as support
-    rectangle "Observability Runtime\nGrafana\nPrometheus\nLoki\nPromtail\nTempo" as obs
-  }
-  package "Docker Compose Runtime" as compose {
-    rectangle "Kafka\nkafka-platform" as kafka
-  }
+
+package "GitOps & Delivery" as delivery {
+  rectangle "leninkart-infra\nbranch: dev" as infra
+  rectangle "ArgoCD\nleninkart-root + child apps" as argocd
+  rectangle "Exact Revision Verification\nSync = Synced\nHealth = Healthy" as verify
 }
-package "Validation & Proof (observer only)" as proof {
+
+package "Runtime Services\nk3d-leninkart-dev" as runtime {
+  rectangle "frontend-dev" as frontend
+  rectangle "dev-product-service" as product
+  rectangle "dev-order-service" as order
+  rectangle "Platform Runtime\npostgres / ingress / vault /\nexternal-secrets / loadtest" as support
+}
+
+package "Platform Support" as platform {
+  rectangle "kafka-platform\nexternal Kafka runtime" as kafka
+  rectangle "observability-stack\nbootstrap + generated values" as obsboot
+  rectangle "Observability Runtime\nGrafana / Prometheus /\nLoki / Promtail / Tempo" as obsrt
+}
+
+package "Validation & Proof" as proof {
   rectangle "project-validation" as pv
-  rectangle "Browser UI Proof\nGitHub / GitOps / ArgoCD / app / observability" as ui
-  rectangle "Reports & Evidence\nMkDocs / screenshots / docs" as docs
+  rectangle "Real UI Proof\nGitHub / GitOps / ArgoCD /\nApp / Observability screenshots" as ui
+  rectangle "Reports & Docs\nMkDocs / evidence index /\nvalidation reports" as docs
 }
+
 operator --> jira
-operator --> gha : dispatch with jira key
+jira --> gha : ticket key used as input
 gha --> runner
 runner --> poc
-poc --> jira : read + comment
-poc --> infra : push desired state
-obsboot --> infra : write observability values
-infra --> argocd : desired revision
-argocd --> apps : reconcile
-apps --> support : cluster services
-apps --> kafka : events
-apps ..> obs : telemetry
-kafka ..> obs : metrics
-pv ..> gha : CI proof
-pv ..> infra : GitOps proof
-pv ..> argocd : sync / health proof
-pv ..> apps : app proof
-pv ..> obs : observability proof
+poc --> config
+poc --> safety
+poc --> feedback
+poc --> infra : update values-dev.yaml\ncommit + push
+infra --> argocd : GitOps source of truth
+argocd --> verify
+argocd --> frontend
+argocd --> product
+argocd --> order
+argocd --> support
+frontend --> kafka
+product --> kafka
+order --> kafka
+obsboot --> infra : generates observability values
+argocd --> obsrt
+pv --> gha : public run UI proof
+pv --> infra : GitOps commit proof
+pv --> argocd : sync/health proof
+pv --> frontend : application proof
+pv --> obsrt : dashboard/log/trace proof
 pv --> ui
 pv --> docs
+
 @enduml

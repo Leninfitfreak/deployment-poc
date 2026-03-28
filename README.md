@@ -48,32 +48,35 @@ This is not currently an automatic Jira-webhook-triggered system. That distincti
 
 ### Platform Architecture
 
-![LeninKart platform architecture](docs/architecture/leninkart-platform-architecture-showcase.png)
+![LeninKart platform architecture](docs/architecture/leninkart-platform-architecture.png)
 
-The README-facing showcase view is the fastest way to explain the platform in GitHub, LinkedIn, or interviews. It highlights the real control path, GitOps delivery path, runtime boundary, external Kafka placement, and the validation sidecar without overloading the image.
+The high-level platform has six real layers:
 
-The corrected platform model has six distinct boundaries:
-
-- external control and source repos
-  - Jira Cloud for deployment intent
+- request and control
+  - Jira deployment request
   - GitHub Actions manual dispatch
-  - GitHub-hosted `leninkart-infra/dev` as the GitOps source of truth
-- local execution and bootstrap
-  - the Windows self-hosted runner
-  - `deployment-poc` orchestration and safety logic
-  - `observability-stack/bootstrap` generating observability values into GitOps
-- local Docker host
-  - `k3d-leninkart-dev` as the Kubernetes cluster runtime
-  - a separate Docker Compose runtime for Kafka
-- in-cluster control plane and runtime
-  - ArgoCD inside the cluster
-  - app workloads: frontend, product-service, order-service
-  - in-cluster support: ingress, Postgres, Vault, External Secrets, loadtest
-  - in-cluster observability runtime: Grafana, Prometheus, Loki, Promtail, Tempo
-- external runtime dependency
-  - `kafka-platform` running outside Kubernetes via Docker Compose
+  - self-hosted runner on the same machine as `k3d`
+- orchestration and safety
+  - `deployment-poc` orchestrator
+  - config-driven target resolution
+  - deployment state, locking, stale-lock recovery, rollback scaffolding
+  - Jira progress and final feedback
+- GitOps and delivery
+  - `leninkart-infra/dev`
+  - ArgoCD apps under `argocd/applications/dev`
+  - exact revision validation
+- runtime services
+  - `frontend-dev`
+  - `dev-product-service`
+  - `dev-order-service`
+  - supporting runtime apps like ingress, postgres, Vault, and observability components
+- supporting platform
+  - Kafka runtime
+  - observability bootstrap and runtime dashboards/logs/traces
 - validation and proof
-  - `project-validation` as a read-only observer for GitHub, GitOps, ArgoCD, app UI, and observability evidence
+  - `project-validation`
+  - browser-driven screenshots
+  - validation reports and MkDocs pages
 
 ### Deployment Flow
 
@@ -82,20 +85,6 @@ The corrected platform model has six distinct boundaries:
 The focused deployment path is:
 
 `Jira ticket -> workflow_dispatch -> self-hosted runner -> deployment-poc -> leninkart-infra/dev -> ArgoCD -> Synced + Healthy -> Jira feedback`
-
-### Detailed Platform Architecture
-
-![LeninKart detailed platform architecture](docs/architecture/leninkart-platform-architecture-detailed.png)
-
-Use the detailed view when you want the real component inventory rather than the higher-level boundary overview. It expands:
-
-For diagram roles and file locations, see [docs/architecture/ARCHITECTURE_DIAGRAM_GUIDE.md](docs/architecture/ARCHITECTURE_DIAGRAM_GUIDE.md).
-
-- application workloads
-- platform support components
-- observability runtime components
-- Docker Compose Kafka placement
-- validation/proof as a separate observer layer
 
 ## Repositories Involved
 
@@ -231,7 +220,7 @@ The current runtime uses:
 - Promtail
 - Tempo
 
-The `observability-stack/bootstrap` workspace runs outside the cluster and generates the values that feed the observability apps managed by `leninkart-infra`. The actual observability runtime, however, is in-cluster: Grafana, Prometheus, Loki, Promtail, and Tempo all run inside `k3d-leninkart-dev`. `project-validation` captures real browser proof from those live UIs.
+The `observability-stack/bootstrap` workspace generates the values and bootstrap content that feed the observability apps managed by `leninkart-infra`. `project-validation` already captures real browser proof for dashboards, logs, metrics, and traces.
 
 ## Validation And Proof System
 
@@ -299,22 +288,12 @@ Dispatch the workflow manually from GitHub Actions or run the orchestrator local
 
 ### Jira Ticket Format
 
-Preferred summary pattern:
-
-```text
-Deploy LeninKart product-service to dev (v1)
-```
-
-Preferred description pattern:
-
 ```text
 app: leninkart
 component: product-service
 env: dev
 version: v1
 url: http://dev.leninkart.local/api/products
-reason: validate Jira -> GitHub Actions -> GitOps -> ArgoCD flow
-notes: created for deployment evidence and demo validation
 ```
 
 ### GitHub Actions Entry Point

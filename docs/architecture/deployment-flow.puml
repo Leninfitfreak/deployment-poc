@@ -1,39 +1,54 @@
 @startuml
-title LeninKart Deployment Control Flow
+title LeninKart Jira -> GitOps -> ArgoCD Deployment Flow
+
 skinparam backgroundColor white
 skinparam shadowing false
 skinparam defaultFontName Segoe UI
 skinparam ArrowColor #334155
-skinparam ArrowThickness 1.4
+skinparam ArrowThickness 1.3
 skinparam sequenceMessageAlign center
-skinparam sequenceParticipant { BackgroundColor white; BorderColor #475569 }
+skinparam sequenceParticipant {
+  BackgroundColor white
+  BorderColor #475569
+}
+
 actor Operator
-participant Jira
+participant "Jira" as Jira
 participant "GitHub Actions\nDeploy From Jira" as GHA
 participant "Self-hosted Runner" as Runner
-participant "deployment-poc" as POC
-participant "leninkart-infra\nGitOps repo" as Infra
-participant "ArgoCD\nin k3d cluster" as Argo
-participant "Kubernetes Workloads" as K8s
-participant "project-validation\nobserver only" as PV
-Operator -> Jira : create / update request
+participant "deployment-poc\norchestrator" as POC
+participant "leninkart-infra\n(dev)" as Infra
+participant "ArgoCD" as Argo
+participant "Kubernetes\nk3d-leninkart-dev" as K8s
+participant "project-validation" as PV
+
+Operator -> Jira : create / maintain deployment ticket
 Operator -> GHA : workflow_dispatch(jira_ticket)
-GHA -> Runner : schedule job
-Runner -> POC : execute
-POC -> Jira : fetch metadata + progress
-POC -> Infra : update values + push
-Infra -> Argo : new desired revision
-POC -> Argo : wait for sync + health\nverify exact GitOps revision
-Argo -> K8s : reconcile workloads
+GHA -> Runner : schedule job on self-hosted runner
+Runner -> POC : execute orchestrator
+POC -> Jira : fetch issue + parse metadata
+POC -> Jira : progress comment\nworkflow_triggered / jira_validated
+POC -> POC : validate metadata\nresolve target\nacquire lock
+POC -> Jira : progress comment\ntarget_resolved / lock_acquired
+POC -> Infra : update values-dev.yaml\ncommit + push
+POC -> Jira : progress comment\ngitops_commit_pushed
+Infra -> Argo : new Git revision available
+POC -> Argo : wait for sync + health\nexact revision check
+POC -> Jira : progress comment\nargocd_sync_started
+Argo -> K8s : reconcile application
+Argo --> POC : Synced + Healthy\nexact revision
+POC -> Jira : progress comment\nargocd_synced_healthy / post_checks_completed
 POC -> Jira : final comment + transition
-PV ..> GHA : CI proof
-PV ..> Infra : GitOps proof
-PV ..> Argo : sync / health proof
-PV ..> K8s : UI proof
+POC --> GHA : deployment-result artifact
+PV -> GHA : validate workflow run UI
+PV -> Infra : validate Git commit UI
+PV -> Argo : validate app UI
+PV -> K8s : validate live app reachability
+
 note right of GHA
-Manual trigger model:\nJira ticket creation alone\ndoes not auto-dispatch.
+Current trigger model is manual.
+Jira ticket creation alone does not
+auto-dispatch the workflow yet.
 end note
-note right of K8s
-Kafka remains outside this control flow\nas a Docker Compose runtime dependency.
-end note
+
 @enduml
