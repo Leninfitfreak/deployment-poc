@@ -59,10 +59,7 @@ jobs:
 
       - name: Start local ArgoCD port-forward
         shell: cmd
-        run: |
-          if exist "%RUNNER_TEMP%\argocd-port-forward.log" del /f /q "%RUNNER_TEMP%\argocd-port-forward.log"
-          start "argocd-port-forward" /MIN cmd /c "kubectl port-forward -n argocd svc/argocd-server 8085:443 > ^"%RUNNER_TEMP%\argocd-port-forward.log^" 2^>^&1"
-          powershell -NoProfile -ExecutionPolicy Bypass -Command "$deadline=(Get-Date).AddSeconds(60); while((Get-Date) -lt $deadline){ try { $response = Invoke-WebRequest -Uri 'https://127.0.0.1:8085/api/version' -UseBasicParsing -SkipCertificateCheck -TimeoutSec 5; if($response.StatusCode -ge 200 -and $response.StatusCode -lt 500){ Write-Host 'ArgoCD port-forward is ready'; exit 0 } } catch {}; Start-Sleep -Seconds 2 }; if(Test-Path \"$env:RUNNER_TEMP\argocd-port-forward.log\"){ Get-Content -LiteralPath \"$env:RUNNER_TEMP\argocd-port-forward.log\" -ErrorAction SilentlyContinue }; exit 1"
+        run: call scripts\start-argocd-port-forward.cmd
 
       - name: Verify local runner toolchain
         shell: cmd
@@ -83,7 +80,7 @@ jobs:
           JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
           INFRA_PAT: ${{ secrets.INFRA_PAT }}
-          ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
+          ARGOCD_SERVER: 127.0.0.1:18085
           ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
           GITHUB_API_TOKEN: ${{ github.token }}
           ARGOCD_INSECURE: "true"
