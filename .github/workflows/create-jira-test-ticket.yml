@@ -11,7 +11,7 @@ on:
       summary:
         description: Jira summary
         required: true
-        default: Deploy LeninKart Dev
+        default: Deploy LeninKart frontend to dev (v2)
         type: string
       description:
         description: Multiline Jira description

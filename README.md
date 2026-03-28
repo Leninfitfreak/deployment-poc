@@ -288,12 +288,22 @@ Dispatch the workflow manually from GitHub Actions or run the orchestrator local
 
 ### Jira Ticket Format
 
+Preferred summary pattern:
+
+```text
+Deploy LeninKart product-service to dev (v1)
+```
+
+Preferred description pattern:
+
 ```text
 app: leninkart
 component: product-service
 env: dev
 version: v1
 url: http://dev.leninkart.local/api/products
+reason: validate Jira -> GitHub Actions -> GitOps -> ArgoCD flow
+notes: created for deployment evidence and demo validation
 ```
 
 ### GitHub Actions Entry Point
