@@ -50,8 +50,6 @@ This is not currently an automatic Jira-webhook-triggered system. That distincti
 
 ![LeninKart platform architecture](docs/architecture/leninkart-platform-architecture.png)
 
-The README-facing PNG is the polished presentation export. The canonical technical source remains [docs/architecture/leninkart-platform-architecture.puml](docs/architecture/leninkart-platform-architecture.puml), with an editable presentation copy in [docs/architecture/leninkart-platform-architecture.drawio](docs/architecture/leninkart-platform-architecture.drawio).
-
 The high-level platform has six real layers:
 
 - request and control
@@ -83,8 +81,6 @@ The high-level platform has six real layers:
 ### Deployment Flow
 
 ![LeninKart deployment flow](docs/architecture/deployment-flow.png)
-
-The focused flow diagram follows the same model: PlantUML is the source of truth, draw.io is the editable presentation layer, and the PNG is the exported README asset.
 
 The focused deployment path is:
 
