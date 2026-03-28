@@ -58,27 +58,9 @@ jobs:
           echo %RUNNER_ARGOCD_DIR%>> "%GITHUB_PATH%"
 
       - name: Start local ArgoCD port-forward
-        shell: powershell
+        shell: cmd
         run: |
-          $logPath = Join-Path $env:RUNNER_TEMP 'argocd-port-forward.log'
-          $pidPath = Join-Path $env:RUNNER_TEMP 'argocd-port-forward.pid'
-          if (Test-Path $logPath) { Remove-Item -LiteralPath $logPath -Force }
-          if (Test-Path $pidPath) { Remove-Item -LiteralPath $pidPath -Force }
-          $process = Start-Process -FilePath 'kubectl' -ArgumentList 'port-forward','-n','argocd','svc/argocd-server','8085:443' -RedirectStandardOutput $logPath -RedirectStandardError $logPath -PassThru -WindowStyle Hidden
-          $process.Id | Set-Content -LiteralPath $pidPath
-          $deadline = (Get-Date).AddSeconds(60)
-          while ((Get-Date) -lt $deadline) {
-            if ($process.HasExited) {
-              Get-Content -LiteralPath $logPath -ErrorAction SilentlyContinue
-              throw "ArgoCD port-forward exited early with code $($process.ExitCode)"
-            }
-            try {
-              $response = Invoke-WebRequest -Uri 'https://127.0.0.1:8085/api/version' -UseBasicParsing -SkipCertificateCheck -TimeoutSec 5
-              if ($response.StatusCode -ge 200 -and $response.StatusCode -lt 500) {
-                Write-Host 'ArgoCD port-forward is ready'
-                exit 0
-              }
-            } catch {
+          powershell -NoProfile -ExecutionPolicy Bypass -Command "$logPath = Join-Path $env:RUNNER_TEMP 'argocd-port-forward.log'; $pidPath = Join-Path $env:RUNNER_TEMP 'argocd-port-forward.pid'; if (Test-Path $logPath) { Remove-Item -LiteralPath $logPath -Force }; if (Test-Path $pidPath) { Remove-Item -LiteralPath $pidPath -Force }; $process = Start-Process -FilePath 'kubectl' -ArgumentList 'port-forward','-n','argocd','svc/argocd-server','8085:443' -RedirectStandardOutput $logPath -RedirectStandardError $logPath -PassThru -WindowStyle Hidden; $process.Id | Set-Content -LiteralPath $pidPath; $deadline = (Get-Date).AddSeconds(60); while ((Get-Date) -lt $deadline) { if ($process.HasExited) { Get-Content -LiteralPath $logPath -ErrorAction SilentlyContinue; throw "ArgoCD port-forward exited early with code $($process.ExitCode)" }; try { $response = Invoke-WebRequest -Uri 'https://127.0.0.1:8085/api/version' -UseBasicParsing -SkipCertificateCheck -TimeoutSec 5; if ($response.StatusCode -ge 200 -and $response.StatusCode -lt 500) { Write-Host 'ArgoCD port-forward is ready'; exit 0 } } catch {}; Start-Sleep -Seconds 2 }; Get-Content -LiteralPath $logPath -ErrorAction SilentlyContinue; throw 'Timed out waiting for ArgoCD port-forward to become ready'"
             }
             Start-Sleep -Seconds 2
           }
