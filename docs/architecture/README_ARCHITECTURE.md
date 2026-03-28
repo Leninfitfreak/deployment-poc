@@ -12,6 +12,7 @@ This folder contains the presentation-oriented architecture diagrams for the cur
 - `leninkart-platform-architecture-linkedin.png`
 - `deployment-flow-linkedin.drawio`
 - `deployment-flow-linkedin.png`
+- `assets/*.svg`
 
 
 ## Variants
@@ -24,6 +25,10 @@ The diagram set now has two presentation tracks:
   - larger, icon-based presentation variants for GitHub showcase and LinkedIn use
 
 PlantUML remains the canonical source of truth for architecture meaning. The LinkedIn variants are presentation-only derivatives and should stay semantically aligned with the PlantUML files.
+
+
+The LinkedIn variants use a small local icon asset set under `docs/architecture/assets/` for real vendor-style technology logos where appropriate. Internal LeninKart-specific components that do not have an official icon stay as neutral service cards instead of placeholder bubbles.
+
 
 ## Diagram Scope
 
