@@ -48,7 +48,9 @@ This is not currently an automatic Jira-webhook-triggered system. That distincti
 
 ### Platform Architecture
 
-![LeninKart platform architecture](docs/architecture/leninkart-platform-architecture.png)
+![LeninKart platform architecture](docs/architecture/leninkart-platform-architecture-showcase.png)
+
+The README-facing showcase view is the fastest way to explain the platform in GitHub, LinkedIn, or interviews. It highlights the real control path, GitOps delivery path, runtime boundary, external Kafka placement, and the validation sidecar without overloading the image.
 
 The corrected platform model has six distinct boundaries:
 
@@ -86,6 +88,8 @@ The focused deployment path is:
 ![LeninKart detailed platform architecture](docs/architecture/leninkart-platform-architecture-detailed.png)
 
 Use the detailed view when you want the real component inventory rather than the higher-level boundary overview. It expands:
+
+For diagram roles and file locations, see [docs/architecture/ARCHITECTURE_DIAGRAM_GUIDE.md](docs/architecture/ARCHITECTURE_DIAGRAM_GUIDE.md).
 
 - application workloads
 - platform support components
