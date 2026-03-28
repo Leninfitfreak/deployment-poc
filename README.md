@@ -50,33 +50,28 @@ This is not currently an automatic Jira-webhook-triggered system. That distincti
 
 ![LeninKart platform architecture](docs/architecture/leninkart-platform-architecture.png)
 
-The high-level platform has six real layers:
+The corrected platform model has six distinct boundaries:
 
-- request and control
-  - Jira deployment request
+- external control and source repos
+  - Jira Cloud for deployment intent
   - GitHub Actions manual dispatch
-  - self-hosted runner on the same machine as `k3d`
-- orchestration and safety
-  - `deployment-poc` orchestrator
-  - config-driven target resolution
-  - deployment state, locking, stale-lock recovery, rollback scaffolding
-  - Jira progress and final feedback
-- GitOps and delivery
-  - `leninkart-infra/dev`
-  - ArgoCD apps under `argocd/applications/dev`
-  - exact revision validation
-- runtime services
-  - `frontend-dev`
-  - `dev-product-service`
-  - `dev-order-service`
-  - supporting runtime apps like ingress, postgres, Vault, and observability components
-- supporting platform
-  - Kafka runtime
-  - observability bootstrap and runtime dashboards/logs/traces
+  - GitHub-hosted `leninkart-infra/dev` as the GitOps source of truth
+- local execution and bootstrap
+  - the Windows self-hosted runner
+  - `deployment-poc` orchestration and safety logic
+  - `observability-stack/bootstrap` generating observability values into GitOps
+- local Docker host
+  - `k3d-leninkart-dev` as the Kubernetes cluster runtime
+  - a separate Docker Compose runtime for Kafka
+- in-cluster control plane and runtime
+  - ArgoCD inside the cluster
+  - app workloads: frontend, product-service, order-service
+  - in-cluster support: ingress, Postgres, Vault, External Secrets, loadtest
+  - in-cluster observability runtime: Grafana, Prometheus, Loki, Promtail, Tempo
+- external runtime dependency
+  - `kafka-platform` running outside Kubernetes via Docker Compose
 - validation and proof
-  - `project-validation`
-  - browser-driven screenshots
-  - validation reports and MkDocs pages
+  - `project-validation` as a read-only observer for GitHub, GitOps, ArgoCD, app UI, and observability evidence
 
 ### Deployment Flow
 
@@ -220,7 +215,7 @@ The current runtime uses:
 - Promtail
 - Tempo
 
-The `observability-stack/bootstrap` workspace generates the values and bootstrap content that feed the observability apps managed by `leninkart-infra`. `project-validation` already captures real browser proof for dashboards, logs, metrics, and traces.
+The `observability-stack/bootstrap` workspace runs outside the cluster and generates the values that feed the observability apps managed by `leninkart-infra`. The actual observability runtime, however, is in-cluster: Grafana, Prometheus, Loki, Promtail, and Tempo all run inside `k3d-leninkart-dev`. `project-validation` captures real browser proof from those live UIs.
 
 ## Validation And Proof System
 

@@ -1,47 +1,37 @@
 # Architecture Diagrams
 
-This folder contains the presentation-oriented architecture diagrams for the current LeninKart platform and deployment control plane.
+This folder contains the corrected technical and presentation architecture diagrams for the current LeninKart platform.
 
-## Files
+## Source Of Truth
 
 - `leninkart-platform-architecture.puml`
-- `leninkart-platform-architecture.png`
 - `deployment-flow.puml`
-- `deployment-flow.png`
+
+PlantUML is the canonical technical source for architecture meaning.
+
+## Presentation Assets
+
 - `leninkart-platform-architecture-linkedin.drawio`
 - `leninkart-platform-architecture-linkedin.png`
 - `deployment-flow-linkedin.drawio`
 - `deployment-flow-linkedin.png`
-- `assets/*.svg`
 
+The draw.io files are editable presentation derivatives that stay aligned with the corrected PlantUML model.
 
-## Variants
+## Corrected Runtime Boundaries
 
-The diagram set now has two presentation tracks:
+The current diagrams now reflect these verified implementation facts:
 
-- `leninkart-platform-architecture.png` and `deployment-flow.png`
-  - the normal technical documentation baseline used by the README
-- `*-linkedin.drawio` and `*-linkedin.png`
-  - larger, icon-based presentation variants for GitHub showcase and LinkedIn use
+- ArgoCD runs inside the `k3d-leninkart-dev` Kubernetes cluster
+- application workloads, Postgres, Vault, External Secrets, ingress, loadtest, and observability runtime are all in-cluster
+- Kafka does not run inside Kubernetes; it runs separately via `kafka-platform/docker-compose.yml`
+- `observability-stack/bootstrap` is an external generator that writes values into `leninkart-infra`; it is not an in-cluster runtime service
+- `deployment-poc` runs in the self-hosted runner execution path, not as a runtime platform service
+- `project-validation` is a read-only proof layer and does not drive deployment
 
-PlantUML remains the canonical source of truth for architecture meaning. The LinkedIn variants are presentation-only derivatives and should stay semantically aligned with the PlantUML files.
+## Diagram Intent
 
+- `leninkart-platform-architecture.*` focuses on runtime and boundary correctness
+- `deployment-flow.*` focuses on the Jira -> GitHub Actions -> runner -> GitOps -> ArgoCD control path
 
-The LinkedIn variants use a small local icon asset set under `docs/architecture/assets/` for real vendor-style technology logos where appropriate. Internal LeninKart-specific components that do not have an official icon stay as neutral service cards instead of placeholder bubbles.
-
-
-## Diagram Scope
-
-The diagrams intentionally reflect the currently implemented setup:
-
-- Jira request input
-- manual GitHub Actions dispatch
-- Windows self-hosted runner
-- `deployment-poc` orchestration and safety layer
-- `leninkart-infra/dev` as the GitOps source of truth
-- ArgoCD and the local `k3d-leninkart-dev` cluster
-- LeninKart application services
-- Kafka and observability support
-- `project-validation` as the proof layer
-
-They do not depict unimplemented auto-trigger behavior from Jira.
+The diagrams intentionally do not show unimplemented Jira webhook auto-trigger behavior.
