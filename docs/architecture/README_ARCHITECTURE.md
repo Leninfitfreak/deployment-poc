@@ -6,8 +6,15 @@ This folder contains the presentation-oriented architecture diagrams for the cur
 
 - `leninkart-platform-architecture.puml`
 - `leninkart-platform-architecture.png`
+- `leninkart-platform-architecture-gui.drawio`
+- `leninkart-platform-architecture-gui.svg`
+- `leninkart-platform-architecture-gui.png`
 - `deployment-flow.puml`
 - `deployment-flow.png`
+- `deployment-flow-gui.drawio`
+- `deployment-flow-gui.svg`
+- `deployment-flow-gui.png`
+- `ARCHITECTURE_DIAGRAM_GUIDE.md`
 
 ## Diagram Scope
 
@@ -24,3 +31,10 @@ The diagrams intentionally reflect the currently implemented setup:
 - `project-validation` as the proof layer
 
 They do not depict unimplemented auto-trigger behavior from Jira.
+
+## Source And Presentation Split
+
+- The baseline `*.puml` and `*.png` files remain the architecture source of truth and original proof view.
+- The `*-gui.*` files are polished presentation redraws based on those same two baseline diagrams.
+- Use the baseline diagrams when you want the original documented structure.
+- Use the GUI variants when you want a recruiter-friendly, LinkedIn-ready, draw.io-style visual.

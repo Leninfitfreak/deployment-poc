@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2060" height="1440" viewBox="0 0 2060 1440">
+<defs><style>.title{font:700 32px Segoe UI,Arial,sans-serif;fill:#162640}.sub{font:15px Segoe UI,Arial,sans-serif;fill:#637289}.lane{font:700 16px Segoe UI,Arial,sans-serif;fill:#22324d}.step{font:13px Segoe UI,Arial,sans-serif;fill:#42536b}.note{font:13px Segoe UI,Arial,sans-serif;fill:#5f6f87}.box{fill:#fff;stroke:#c8d4e8;stroke-width:2}.msg{stroke:#4a5f80;stroke-width:2.4;fill:none;marker-end:url(#arrow)}.reply{stroke:#3182f6;stroke-width:2;stroke-dasharray:7 6;fill:none;marker-end:url(#darrow)}.proof{stroke:#7f8ea6;stroke-width:2;stroke-dasharray:4 5;fill:none;marker-end:url(#parrow)}.vline{stroke:#cfd9e8;stroke-width:2;stroke-dasharray:8 8}</style><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#4a5f80"/></marker><marker id="darrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#3182f6"/></marker><marker id="parrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#7f8ea6"/></marker></defs>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="440" y="48" class="title">LeninKart Jira -&gt; GitOps -&gt; ArgoCD Deployment Flow</text>
+<text x="440" y="74" class="sub">Polished execution view based on the current baseline deployment sequence</text>
+<rect x="14" y="110" width="152" height="52" rx="12" class="box"/>
+<text x="90" y="141" text-anchor="middle" class="lane">Operator</text>
+<line x1="90" y1="172" x2="90" y2="1300" class="vline"/>
+<rect x="204" y="110" width="152" height="52" rx="12" class="box"/>
+<text x="280" y="141" text-anchor="middle" class="lane">Jira</text>
+<line x1="280" y1="172" x2="280" y2="1300" class="vline"/>
+<rect x="434" y="110" width="152" height="52" rx="12" class="box"/>
+<text x="510" y="141" text-anchor="middle" class="lane">GitHub Actions</text>
+<line x1="510" y1="172" x2="510" y2="1300" class="vline"/>
+<rect x="714" y="110" width="152" height="52" rx="12" class="box"/>
+<text x="790" y="141" text-anchor="middle" class="lane">Self-hosted Runner</text>
+<line x1="790" y1="172" x2="790" y2="1300" class="vline"/>
+<rect x="994" y="110" width="152" height="52" rx="12" class="box"/>
+<text x="1070" y="141" text-anchor="middle" class="lane">deployment-poc</text>
+<line x1="1070" y1="172" x2="1070" y2="1300" class="vline"/>
+<rect x="1284" y="110" width="152" height="52" rx="12" class="box"/>
+<text x="1360" y="141" text-anchor="middle" class="lane">leninkart-infra</text>
+<line x1="1360" y1="172" x2="1360" y2="1300" class="vline"/>
+<rect x="1504" y="110" width="152" height="52" rx="12" class="box"/>
+<text x="1580" y="141" text-anchor="middle" class="lane">ArgoCD</text>
+<line x1="1580" y1="172" x2="1580" y2="1300" class="vline"/>
+<rect x="1704" y="110" width="152" height="52" rx="12" class="box"/>
+<text x="1780" y="141" text-anchor="middle" class="lane">Kubernetes</text>
+<line x1="1780" y1="172" x2="1780" y2="1300" class="vline"/>
+<rect x="1884" y="110" width="152" height="52" rx="12" class="box"/>
+<text x="1960" y="141" text-anchor="middle" class="lane">project-validation</text>
+<line x1="1960" y1="172" x2="1960" y2="1300" class="vline"/>
+<path d="M90 230 L280 230" class="msg"/>
+<text x="185.0" y="220" text-anchor="middle" class="step">create / maintain deployment ticket</text>
+<path d="M90 300 L510 300" class="msg"/>
+<text x="300.0" y="290" text-anchor="middle" class="step">workflow_dispatch(jira_ticket)</text>
+<path d="M510 380 L790 380" class="msg"/>
+<text x="650.0" y="370" text-anchor="middle" class="step">schedule job on self-hosted runner</text>
+<path d="M790 460 L1070 460" class="msg"/>
+<text x="930.0" y="450" text-anchor="middle" class="step">execute orchestrator</text>
+<path d="M1070 530 L280 530" class="msg"/>
+<text x="675.0" y="520" text-anchor="middle" class="step">fetch issue + parse metadata</text>
+<path d="M1070 610 L280 610" class="reply"/>
+<text x="675.0" y="600" text-anchor="middle" class="step">progress comment: workflow_triggered / jira_validated</text>
+<rect x="1015" y="655" width="110" height="88" rx="12" class="box"/>
+<text x="1070" y="685" text-anchor="middle" class="step">validate metadata</text>
+<text x="1070" y="707" text-anchor="middle" class="step">resolve target</text>
+<text x="1070" y="729" text-anchor="middle" class="step">acquire lock</text>
+<path d="M1070 790 L280 790" class="reply"/>
+<text x="675.0" y="780" text-anchor="middle" class="step">progress comment: target_resolved / lock_acquired</text>
+<path d="M1070 880 L1360 880" class="msg"/>
+<text x="1215.0" y="870" text-anchor="middle" class="step">update values-dev.yaml / commit + push</text>
+<path d="M1070 970 L280 970" class="reply"/>
+<text x="675.0" y="960" text-anchor="middle" class="step">progress comment: gitops_commit_pushed</text>
+<path d="M1360 1050 L1580 1050" class="msg"/>
+<text x="1470.0" y="1040" text-anchor="middle" class="step">new Git revision available</text>
+<path d="M1070 1120 L1580 1120" class="msg"/>
+<text x="1325.0" y="1110" text-anchor="middle" class="step">wait for sync + health / exact revision check</text>
+<path d="M1580 1190 L1780 1190" class="msg"/>
+<text x="1680.0" y="1180" text-anchor="middle" class="step">reconcile application</text>
+<path d="M1580 1260 L1070 1260" class="reply"/>
+<text x="1325.0" y="1250" text-anchor="middle" class="step">Synced + Healthy / exact revision</text>
+<path d="M1960 1000 L510 1000" class="proof"/>
+<text x="1235.0" y="990" text-anchor="middle" class="step">validate workflow run UI</text>
+<path d="M1960 1060 L1360 1060" class="proof"/>
+<text x="1660.0" y="1050" text-anchor="middle" class="step">validate Git commit UI</text>
+<path d="M1960 1120 L1580 1120" class="proof"/>
+<text x="1770.0" y="1110" text-anchor="middle" class="step">validate sync / health UI</text>
+<path d="M1960 1180 L1780 1180" class="proof"/>
+<text x="1870.0" y="1170" text-anchor="middle" class="step">validate app UI / reachability</text>
+<rect x="70" y="1330" width="420" height="62" rx="14" fill="#fff7d6" stroke="#e3d08f" stroke-width="2"/>
+<text x="90" y="1359" class="note">Current trigger model is manual:</text>
+<text x="90" y="1379" class="note">Jira ticket creation alone does not auto-dispatch the workflow yet.</text>
+</svg>
