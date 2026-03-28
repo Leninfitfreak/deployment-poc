@@ -1,63 +1,39 @@
 @startuml
 title LeninKart Deployment Control Flow
-
 skinparam backgroundColor white
 skinparam shadowing false
 skinparam defaultFontName Segoe UI
 skinparam ArrowColor #334155
-skinparam ArrowThickness 1.3
+skinparam ArrowThickness 1.4
 skinparam sequenceMessageAlign center
 skinparam sequenceParticipant { BackgroundColor white; BorderColor #475569 }
-
 actor Operator
-participant "Jira" as Jira
-participant "GitHub Actions
-Deploy From Jira" as GHA
-participant "Self-hosted Runner
-(local Windows host)" as Runner
-participant "deployment-poc
-orchestrator" as POC
-participant "GitHub Repo
-leninkart-infra / dev" as Infra
-participant "ArgoCD
-(in k3d cluster)" as Argo
-participant "Kubernetes Workloads
-frontend / product / order" as K8s
-participant "project-validation
-observer only" as PV
-
-Operator -> Jira : create / update deployment request
+participant Jira
+participant "GitHub Actions\nDeploy From Jira" as GHA
+participant "Self-hosted Runner" as Runner
+participant "deployment-poc" as POC
+participant "leninkart-infra\nGitOps repo" as Infra
+participant "ArgoCD\nin k3d cluster" as Argo
+participant "Kubernetes Workloads" as K8s
+participant "project-validation\nobserver only" as PV
+Operator -> Jira : create / update request
 Operator -> GHA : workflow_dispatch(jira_ticket)
-GHA -> Runner : schedule self-hosted job
-Runner -> POC : execute locally
-POC -> Jira : fetch issue metadata
-POC -> Jira : stage progress comments
-POC -> POC : validate, resolve target, lock, state checks
-POC -> Infra : update values-dev.yaml
-commit + push
-Infra -> Argo : new desired revision available
-POC -> Argo : wait for sync + health
-verify exact GitOps revision
-Argo -> K8s : reconcile desired state
-Argo --> POC : Synced + Healthy
-exact revision confirmed
+GHA -> Runner : schedule job
+Runner -> POC : execute
+POC -> Jira : fetch metadata + progress
+POC -> Infra : update values + push
+Infra -> Argo : new desired revision
+POC -> Argo : wait for sync + health\nverify exact GitOps revision
+Argo -> K8s : reconcile workloads
 POC -> Jira : final comment + transition
-POC --> GHA : deployment-result artifact
-PV ..> GHA : run summary / runner proof
-PV ..> Infra : GitOps commit proof
+PV ..> GHA : CI proof
+PV ..> Infra : GitOps proof
 PV ..> Argo : sync / health proof
-PV ..> K8s : application UI proof
-
+PV ..> K8s : UI proof
 note right of GHA
-Current trigger model is manual.
-Jira ticket creation alone does not
-auto-dispatch the workflow.
+Manual trigger model:\nJira ticket creation alone\ndoes not auto-dispatch.
 end note
-
 note right of K8s
-Kafka stays outside this flow as a
-Docker Compose runtime dependency,
-not as an in-cluster workload.
+Kafka remains outside this control flow\nas a Docker Compose runtime dependency.
 end note
-
 @enduml
