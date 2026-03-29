@@ -15,8 +15,8 @@ services:
       source_branch: "dev"
   order-service:
     dev:
-      latest: "23701703162"
+      latest: "23701774120"
       image: "leninfitfreak/order-service"
-      updated_at: "2026-03-29T04:51:57Z"
+      updated_at: "2026-03-29T04:56:34Z"
       source_repo: "Leninfitfreak/leninkart-order-service"
       source_branch: "dev"
