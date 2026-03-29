@@ -49,5 +49,9 @@ locks:
       repository: Leninfitfreak/deployment-poc
       workflow_name: Deploy From Jira
       acquired_at: '2026-03-29T06:17:33+00:00'
-      last_updated_at: '2026-03-29T06:17:33+00:00'
-      status: in_progress
+      last_updated_at: '2026-03-29T06:28:26+00:00'
+      status: released
+      released_at: '2026-03-29T06:28:26+00:00'
+      note: 'failure: Timed out waiting for ArgoCD app ''dev-order-service'' to reach
+        revision ''75a4ebe9e27f3e53141662989cfb98d86036581c'' with Sync=Synced and
+        Health=Healthy'
