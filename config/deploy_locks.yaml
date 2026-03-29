@@ -21,24 +21,18 @@ locks:
     dev:
       app_key: product-service
       environment: dev
-      ticket: SCRUM-36
-      run_id: '23704101891'
-      run_url: https://github.com/Leninfitfreak/deployment-poc/actions/runs/23704101891
-      requested_version: rollback-bad-20260329
-      resolved_version: rollback-bad-20260329
+      ticket: SCRUM-37
+      run_id: '23704346622'
+      run_url: https://github.com/Leninfitfreak/deployment-poc/actions/runs/23704346622
+      requested_version: rollback-bad-20260329b
+      resolved_version: rollback-bad-20260329b
       actor: Leninfitfreak
       runner_name: leninkar-runner
       repository: Leninfitfreak/deployment-poc
       workflow_name: Deploy From Jira
-      acquired_at: '2026-03-29T07:27:45+00:00'
-      last_updated_at: '2026-03-29T07:34:05+00:00'
-      status: released
-      released_at: '2026-03-29T07:34:05+00:00'
-      note: 'failure: Timed out waiting for ArgoCD app ''dev-product-service'' to
-        reach revision ''f1385899e1914468080e92b35ab7c5a7fee48c50'' with Sync=Synced
-        and Health=Healthy; automatic rollback failed: Timed out waiting for ArgoCD
-        app ''dev-product-service'' to reach revision ''ea6b964615475a08110133050a769eca52ce37ed''
-        with Sync=Synced and Health=Healthy'
+      acquired_at: '2026-03-29T07:43:13+00:00'
+      last_updated_at: '2026-03-29T07:43:13+00:00'
+      status: in_progress
   leninkart/order-service:
     dev:
       app_key: order-service
