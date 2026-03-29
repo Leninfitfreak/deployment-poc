@@ -31,8 +31,10 @@ locks:
       repository: Leninfitfreak/deployment-poc
       workflow_name: Deploy From Jira
       acquired_at: '2026-03-29T02:03:28+00:00'
-      last_updated_at: '2026-03-29T02:03:28+00:00'
-      status: in_progress
+      last_updated_at: '2026-03-29T02:03:42+00:00'
+      status: released
+      released_at: '2026-03-29T02:03:42+00:00'
+      note: already_deployed
   leninkart/order-service:
     dev:
       app_key: order-service
