@@ -75,7 +75,7 @@ jobs:
           JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
           JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
-          INFRA_PAT: ${{ secrets.INFRA_PAT }}
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
           ARGOCD_SERVER: 127.0.0.1:18085
           ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
           GITHUB_API_TOKEN: ${{ github.token }}

@@ -17,7 +17,7 @@ class GitOpsRepoManager:
 
     def clone(self) -> Path:
         if not self.token:
-            raise PocError("INFRA_PAT is required to clone and push the GitOps repo from deployment-poc")
+            raise PocError("PAT_TOKEN is required to clone and push the GitOps repo from deployment-poc")
         authed_url = embed_token_in_https_url(self.repo_url, self.token)
         run(["git", "clone", "--branch", self.branch, authed_url, str(self.repo_dir)])
         return self.repo_dir

@@ -174,7 +174,7 @@ def main() -> int:
         with GitOpsRepoManager(
             target["gitops_repo"],
             target["gitops_branch"],
-            os.environ.get("INFRA_PAT", ""),
+            os.environ.get("PAT_TOKEN", ""),
         ) as gitops:
             current_tag = gitops.get_current_image_tag(target["values_path"])
             current_revision = gitops.get_current_revision()

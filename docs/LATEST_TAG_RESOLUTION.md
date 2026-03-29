@@ -138,6 +138,6 @@ url: http://dev.leninkart.local/api/products
 
 ## Important Note About Secrets
 
-The service CI workflows currently reuse the existing cross-repo PAT secret name `INFRA_PAT` to push metadata updates into `deployment-poc`.
+The service CI workflows use the shared cross-repo PAT secret `PAT_TOKEN` to push metadata updates into `deployment-poc`.
 
-That works, but the name is now broader than the original use. A future cleanup can rename it to something clearer such as `CONTROL_PLANE_PAT`.
+This keeps service CI metadata publishing and deployment-poc GitOps writes aligned on one explicitly named secret.

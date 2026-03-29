@@ -57,7 +57,7 @@ Currently validated LeninKart dev aliases:
 - `JIRA_BASE_URL`
 - `JIRA_EMAIL`
 - `JIRA_API_TOKEN`
-- `INFRA_PAT`
+- `PAT_TOKEN`
 - `ARGOCD_SERVER` optional if ArgoCD verification is enabled
 - `ARGOCD_AUTH_TOKEN` optional if ArgoCD verification is enabled
 

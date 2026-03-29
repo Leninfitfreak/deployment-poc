@@ -18,7 +18,7 @@
 - unsupported environment
 - unknown app or component
 - missing target values file
-- missing `INFRA_PAT`
+- missing `PAT_TOKEN`
 - ArgoCD sync failure
 - ArgoCD health timeout
 
