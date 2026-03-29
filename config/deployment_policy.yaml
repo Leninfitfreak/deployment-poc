@@ -4,7 +4,7 @@ policy:
   auto_release_stale_locks: true
   allow_force_unlock: true
   unlock_requires_run_check: true
-  auto_rollback_enabled: false
+  auto_rollback_enabled: true
   allow_duplicate_deployments: false
   url_fallback_warning_enabled: true
   manual_rollback_enabled: true

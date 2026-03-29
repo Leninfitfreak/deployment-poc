@@ -22,6 +22,9 @@ jira_feedback:
       - argocd_sync_started
       - argocd_synced_healthy
       - post_checks_completed
+      - rollback_started
+      - rollback_completed
+      - rollback_failed
       - completed
       - failed
   transition_name_candidates:
@@ -40,6 +43,14 @@ jira_feedback:
     rollback_skipped:
       - Done
       - Deployed
+      - In Progress
+    rolled_back:
+      - Failed
+      - Blocked
+      - In Progress
+    rollback_failed:
+      - Failed
+      - Blocked
       - In Progress
   comment_on:
     success: true

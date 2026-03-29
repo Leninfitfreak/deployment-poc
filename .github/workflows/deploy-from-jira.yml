@@ -22,6 +22,11 @@ on:
         required: false
         default: false
         type: boolean
+      argocd_timeout_seconds:
+        description: Seconds to wait for ArgoCD reconciliation before timing out
+        required: false
+        default: "600"
+        type: string
 
 permissions:
   contents: write
@@ -86,7 +91,7 @@ jobs:
           TEST_MODE: ${{ inputs.test_mode }}
         run: |
           call scripts\start-argocd-port-forward.cmd
-          python -m src.orchestrator --jira-ticket "${{ inputs.jira_ticket }}" ${{ inputs.trigger_argocd_sync && '--trigger-argocd-sync' || '' }} ${{ inputs.test_mode && '--test-mode' || '' }} ${{ inputs.rollback_to_last_success && '--rollback-to-last-success' || '' }}
+          python -m src.orchestrator --jira-ticket "${{ inputs.jira_ticket }}" --argocd-timeout-seconds "${{ inputs.argocd_timeout_seconds }}" ${{ inputs.trigger_argocd_sync && '--trigger-argocd-sync' || '' }} ${{ inputs.test_mode && '--test-mode' || '' }} ${{ inputs.rollback_to_last_success && '--rollback-to-last-success' || '' }}
 
       - name: Print resolved deployment result
         if: always()

@@ -13,6 +13,10 @@ def utc_now_iso() -> str:
 def jira_feedback_mode(result: dict) -> str:
     action = (result.get("deployment_action") or "").strip()
     outcome = (result.get("outcome") or "").strip()
+    if action == "auto_rolled_back":
+        return "rolled_back"
+    if action == "rollback_failed":
+        return "rollback_failed"
     if outcome == "failure" or action == "failed":
         return "failure"
     if action in {"already_deployed", "rollback_skipped"}:
@@ -24,16 +28,23 @@ def build_final_jira_comment(result: dict) -> str:
     mode = jira_feedback_mode(result)
     target = result.get("target", {}) or {}
     argocd_status = {}
+    rollback_payload = {}
     try:
         argocd_status = json.loads(result.get("argocd_status_json", "{}") or "{}")
     except Exception:
         argocd_status = {}
+    try:
+        rollback_payload = json.loads(result.get("rollback_json", "{}") or "{}")
+    except Exception:
+        rollback_payload = {}
 
     label = {
         "success": "SUCCESS",
         "failure": "FAILURE",
         "already_deployed": "ALREADY_DEPLOYED",
         "rollback_skipped": "ROLLBACK_SKIPPED",
+        "rolled_back": "ROLLED_BACK",
+        "rollback_failed": "ROLLBACK_FAILED",
     }.get(mode, mode.upper())
 
     lines = [
@@ -46,12 +57,14 @@ def build_final_jira_comment(result: dict) -> str:
         f"Version source: {target.get('version_source', '')}",
         f"Deployment action: {result.get('deployment_action', '')}",
     ]
+    if target.get("effective_version"):
+        lines.append(f"Effective live version after workflow: {target.get('effective_version', '')}")
     if target.get("image_repository"):
         lines.append(f"Image repository: {target.get('image_repository', '')}")
     if target.get("latest_tag_updated_at"):
         lines.append(f"Latest tag metadata updated at: {target.get('latest_tag_updated_at', '')}")
     if result.get("gitops_commit"):
-        lines.append(f"GitOps commit SHA: {result.get('gitops_commit', '')}")
+        lines.append(f"Attempted GitOps commit SHA: {result.get('gitops_commit', '')}")
     if result.get("changed_file"):
         lines.append(f"GitOps file: {result.get('changed_file', '')}")
     if target.get("argocd_app"):
@@ -60,6 +73,17 @@ def build_final_jira_comment(result: dict) -> str:
         lines.append(f"Final Sync status: {argocd_status.get('sync', '')}")
         lines.append(f"Final Health status: {argocd_status.get('health', '')}")
         lines.append(f"Observed revision: {argocd_status.get('revision', '')}")
+    if rollback_payload:
+        if rollback_payload.get("trigger_reason"):
+            lines.append(f"Rollback trigger reason: {rollback_payload.get('trigger_reason', '')}")
+        if rollback_payload.get("attempted_version"):
+            lines.append(f"Failed attempted version: {rollback_payload.get('attempted_version', '')}")
+        if rollback_payload.get("rollback_version"):
+            lines.append(f"Reverted stable version: {rollback_payload.get('rollback_version', '')}")
+        if rollback_payload.get("rollback_commit"):
+            lines.append(f"Rollback GitOps commit SHA: {rollback_payload.get('rollback_commit', '')}")
+        if rollback_payload.get("rollback_error"):
+            lines.append(f"Rollback error: {rollback_payload.get('rollback_error', '')}")
     if result.get("workflow_run_url"):
         lines.append(f"Workflow run URL: {result.get('workflow_run_url', '')}")
     if result.get("error"):
@@ -68,6 +92,10 @@ def build_final_jira_comment(result: dict) -> str:
         lines.append("No new GitOps deployment was needed because the requested version was already active and verified.")
     if mode == "rollback_skipped":
         lines.append("Rollback request did not create a new deployment because the last successful version was already active and verified.")
+    if mode == "rolled_back":
+        lines.append("The requested deployment failed, automatic GitOps rollback was executed, and the previous stable version was restored.")
+    if mode == "rollback_failed":
+        lines.append("The requested deployment failed and the automatic rollback path also failed. Manual operator intervention is required.")
     lines.append(f"Timestamp: {utc_now_iso()}")
     return "\n".join(line for line in lines if str(line).strip())
 
@@ -178,7 +206,7 @@ def apply_final_jira_feedback(jira: JiraClient | None, issue: JiraIssue | None, 
     comment_policy = config.get("comment_on", {}) or {}
     should_comment = (
         comment_policy.get("failure", True)
-        if feedback["mode"] == "failure"
+        if feedback["mode"] in {"failure", "rolled_back", "rollback_failed"}
         else comment_policy.get("noop", True)
         if feedback["mode"] in {"already_deployed", "rollback_skipped"}
         else comment_policy.get("success", True)

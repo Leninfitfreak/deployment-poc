@@ -68,6 +68,29 @@ def write_reports(root: Path, result: dict) -> None:
             markdown.append(f"- Rollback source version: `{target.get('rollback_source_version', '')}`")
 
     try:
+        rollback_payload = json.loads(result.get("rollback_json", "{}") or "{}")
+    except Exception:
+        rollback_payload = {}
+    if rollback_payload:
+        markdown.extend(
+            [
+                f"- Automatic rollback attempted: `{rollback_payload.get('attempted', False)}`",
+                f"- Automatic rollback performed: `{rollback_payload.get('performed', False)}`",
+                f"- Automatic rollback success: `{rollback_payload.get('success', False)}`",
+            ]
+        )
+        if rollback_payload.get("trigger_reason"):
+            markdown.append(f"- Rollback trigger reason: `{rollback_payload.get('trigger_reason', '')}`")
+        if rollback_payload.get("attempted_version"):
+            markdown.append(f"- Failed attempted version: `{rollback_payload.get('attempted_version', '')}`")
+        if rollback_payload.get("rollback_version"):
+            markdown.append(f"- Reverted stable version: `{rollback_payload.get('rollback_version', '')}`")
+        if rollback_payload.get("rollback_commit"):
+            markdown.append(f"- Rollback GitOps commit: `{rollback_payload.get('rollback_commit', '')}`")
+        if rollback_payload.get("rollback_error"):
+            markdown.append(f"- Rollback error: `{rollback_payload.get('rollback_error', '')}`")
+
+    try:
         jira_feedback = json.loads(result.get("jira_feedback_json", "{}") or "{}")
     except Exception:
         jira_feedback = {}
