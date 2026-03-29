@@ -111,7 +111,9 @@ def attempt_automatic_rollback(
             git_email,
             test_mode=False,
         )
-        if trigger_argocd_sync:
+        result["performed"] = True
+        result["rollback_commit"] = rollback_commit
+        if argocd.configured():
             argocd.sync_app(target["argocd_app"])
         rollback_status = argocd.wait_until_synced_and_healthy(
             target["argocd_app"],
