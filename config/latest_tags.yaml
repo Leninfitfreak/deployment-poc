@@ -8,9 +8,9 @@ services:
       source_branch: "dev"
   product-service:
     dev:
-      latest: "23812493467"
+      latest: "23816582563"
       image: "leninfitfreak/product-service"
-      updated_at: "2026-03-31T18:12:54Z"
+      updated_at: "2026-03-31T20:07:08Z"
       source_repo: "Leninfitfreak/leninkart-product-service"
       source_branch: "dev"
   order-service:
