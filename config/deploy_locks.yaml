@@ -39,19 +39,15 @@ locks:
     dev:
       app_key: order-service
       environment: dev
-      ticket: SCRUM-35
-      run_id: '23703000558'
-      run_url: https://github.com/Leninfitfreak/deployment-poc/actions/runs/23703000558
+      ticket: SCRUM-45
+      run_id: '23953343055'
+      run_url: https://github.com/Leninfitfreak/deployment-poc/actions/runs/23953343055
       requested_version: latest-dev
-      resolved_version: '23702948455'
+      resolved_version: '23816583483'
       actor: Leninfitfreak
       runner_name: leninkar-runner
       repository: Leninfitfreak/deployment-poc
       workflow_name: Deploy From Jira
-      acquired_at: '2026-03-29T06:17:33+00:00'
-      last_updated_at: '2026-03-29T06:28:26+00:00'
-      status: released
-      released_at: '2026-03-29T06:28:26+00:00'
-      note: 'failure: Timed out waiting for ArgoCD app ''dev-order-service'' to reach
-        revision ''75a4ebe9e27f3e53141662989cfb98d86036581c'' with Sync=Synced and
-        Health=Healthy'
+      acquired_at: '2026-04-03T16:23:35+00:00'
+      last_updated_at: '2026-04-03T16:23:35+00:00'
+      status: in_progress
