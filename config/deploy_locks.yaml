@@ -21,20 +21,18 @@ locks:
     dev:
       app_key: product-service
       environment: dev
-      ticket: SCRUM-48
-      run_id: '23954480712'
-      run_url: https://github.com/Leninfitfreak/deployment-poc/actions/runs/23954480712
+      ticket: SCRUM-51
+      run_id: '23955139890'
+      run_url: https://github.com/Leninfitfreak/deployment-poc/actions/runs/23955139890
       requested_version: latest-dev
       resolved_version: '23817402173'
       actor: Leninfitfreak
       runner_name: leninkar-runner
       repository: Leninfitfreak/deployment-poc
       workflow_name: Deploy From Jira
-      acquired_at: '2026-04-03T16:59:42+00:00'
-      last_updated_at: '2026-04-03T16:59:53+00:00'
-      status: released
-      released_at: '2026-04-03T16:59:53+00:00'
-      note: already_deployed
+      acquired_at: '2026-04-03T17:20:15+00:00'
+      last_updated_at: '2026-04-03T17:20:15+00:00'
+      status: in_progress
   leninkart/order-service:
     dev:
       app_key: order-service
