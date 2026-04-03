@@ -20,6 +20,8 @@ jira_feedback:
       - lock_acquired
       - gitops_commit_pushed
       - argocd_sync_started
+      - argocd_sync_in_progress
+      - argocd_final_verification
       - argocd_synced_healthy
       - post_checks_completed
       - rollback_started

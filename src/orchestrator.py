@@ -119,6 +119,30 @@ def attempt_automatic_rollback(
             target["argocd_app"],
             timeout_seconds=argocd_timeout_seconds,
             expected_revision=rollback_commit,
+            on_wait_progress=(
+                (lambda status: jira_progress_reporter.publish_stage("argocd_sync_in_progress", {
+                    "target": target,
+                    "requested_version": target.get("requested_version", ""),
+                    "resolved_version": rollback_version,
+                    "gitops_commit": rollback_commit,
+                    "detail": (
+                        f"ArgoCD is still reconciling the rollback revision. "
+                        f"Current sync={status.get('sync', '')}, health={status.get('health', '')}, revision={status.get('revision', '')}."
+                    ),
+                })) if jira_progress_reporter else None
+            ),
+            on_final_verification=(
+                (lambda status: jira_progress_reporter.publish_stage("argocd_final_verification", {
+                    "target": target,
+                    "requested_version": target.get("requested_version", ""),
+                    "resolved_version": rollback_version,
+                    "gitops_commit": rollback_commit,
+                    "detail": (
+                        f"Performing final ArgoCD verification for rollback revision={status.get('revision', '')}, "
+                        f"sync={status.get('sync', '')}, health={status.get('health', '')}."
+                    ),
+                })) if jira_progress_reporter else None
+            ),
         )
         result.update({"performed": True, "success": True, "rollback_commit": rollback_commit, "rollback_status": rollback_status})
         if jira_progress_reporter:
@@ -232,6 +256,31 @@ def main() -> int:
         jira_progress_reporter.publish_stage("lock_acquired", {"target": target, "requested_version": requested_version, "resolved_version": desired_version, "detail": "Deployment lock acquired successfully."})
 
         with GitOpsRepoManager(target["gitops_repo"], target["gitops_branch"], os.environ.get("PAT_TOKEN", "")) as gitops:
+            def publish_argocd_sync_in_progress(status: dict) -> None:
+                if jira_progress_reporter:
+                    jira_progress_reporter.publish_stage("argocd_sync_in_progress", {
+                        "target": target,
+                        "requested_version": requested_version,
+                        "resolved_version": desired_version,
+                        "gitops_commit": gitops_commit or current_revision if 'current_revision' in locals() else gitops_commit,
+                        "detail": (
+                            f"ArgoCD is still reconciling the requested revision. "
+                            f"Current sync={status.get('sync', '')}, health={status.get('health', '')}, revision={status.get('revision', '')}."
+                        ),
+                    })
+
+            def publish_argocd_final_verification(status: dict) -> None:
+                if jira_progress_reporter:
+                    jira_progress_reporter.publish_stage("argocd_final_verification", {
+                        "target": target,
+                        "requested_version": requested_version,
+                        "resolved_version": desired_version,
+                        "gitops_commit": gitops_commit or current_revision if 'current_revision' in locals() else gitops_commit,
+                        "detail": (
+                            f"Performing final ArgoCD verification for revision={status.get('revision', '')}, "
+                            f"sync={status.get('sync', '')}, health={status.get('health', '')}."
+                        ),
+                    })
             current_tag = gitops.get_current_image_tag(target["values_path"])
             current_revision = gitops.get_current_revision()
             prechecks = run_prechecks(target, gitops.repo_dir, argocd)
@@ -259,7 +308,13 @@ def main() -> int:
                         jira_progress_reporter.publish_stage("argocd_sync_started", {"target": target, "gitops_commit": current_revision, "detail": "Waiting for ArgoCD to verify the current revision."})
                         if args.trigger_argocd_sync:
                             argocd.sync_app(target["argocd_app"])
-                        argocd_status = argocd.wait_until_synced_and_healthy(target["argocd_app"], timeout_seconds=args.argocd_timeout_seconds, expected_revision=current_revision)
+                        argocd_status = argocd.wait_until_synced_and_healthy(
+                            target["argocd_app"],
+                            timeout_seconds=args.argocd_timeout_seconds,
+                            expected_revision=current_revision,
+                            on_wait_progress=publish_argocd_sync_in_progress,
+                            on_final_verification=publish_argocd_final_verification,
+                        )
                         gitops_commit = current_revision
                         if args.rollback_to_last_success:
                             deployment_action = "rollback_skipped"
@@ -281,7 +336,13 @@ def main() -> int:
                         jira_progress_reporter.publish_stage("argocd_sync_started", {"target": target, "gitops_commit": gitops_commit, "detail": "GitOps commit pushed. Waiting for ArgoCD to reconcile it."})
                         if args.trigger_argocd_sync:
                             argocd.sync_app(target["argocd_app"])
-                        argocd_status = argocd.wait_until_synced_and_healthy(target["argocd_app"], timeout_seconds=args.argocd_timeout_seconds, expected_revision=gitops_commit)
+                        argocd_status = argocd.wait_until_synced_and_healthy(
+                            target["argocd_app"],
+                            timeout_seconds=args.argocd_timeout_seconds,
+                            expected_revision=gitops_commit,
+                            on_wait_progress=publish_argocd_sync_in_progress,
+                            on_final_verification=publish_argocd_final_verification,
+                        )
                     deployment_action = "rollback_test_mode" if args.rollback_to_last_success and test_mode else "rolled_back" if args.rollback_to_last_success else "test_mode" if test_mode else "deployed"
 
                 jira_progress_reporter.publish_stage("argocd_synced_healthy", {"target": target, "gitops_commit": gitops_commit, "detail": "ArgoCD reported the expected revision as Synced and Healthy."})

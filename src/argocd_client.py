@@ -64,13 +64,27 @@ class ArgoCdClient:
         timeout_seconds: int = 600,
         interval_seconds: int = 15,
         expected_revision: str | None = None,
+        on_wait_progress=None,
+        on_final_verification=None,
+        progress_after_seconds: int = 30,
     ) -> dict:
         deadline = time.time() + timeout_seconds
+        start_time = time.time()
+        progress_reported = False
         while time.time() < deadline:
             status = self.get_app_status(app_name)
             revision_matches = not expected_revision or status["revision"] == expected_revision
             if status["sync"] == "Synced" and status["health"] == "Healthy" and revision_matches:
+                if on_final_verification:
+                    on_final_verification(status)
                 return status
+            if (
+                on_wait_progress
+                and not progress_reported
+                and (time.time() - start_time) >= progress_after_seconds
+            ):
+                on_wait_progress(status)
+                progress_reported = True
             time.sleep(interval_seconds)
         if expected_revision:
             raise PocError(
