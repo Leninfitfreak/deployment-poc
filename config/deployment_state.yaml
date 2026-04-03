@@ -19,13 +19,13 @@ deployments:
     dev:
       last_version: '23817402173'
       last_requested_version: latest-dev
-      last_gitops_commit: bce8c2523ebd01901d9a33cd029a8099b3f388b4
-      last_ticket: SCRUM-42
+      last_gitops_commit: b7843d7635c4b2864ff28760e0af78785d4b2935
+      last_ticket: SCRUM-44
       last_argocd_app: dev-product-service
       last_changed_file: applications/product-service/helm/values-dev.yaml
-      last_deployed_at: '2026-03-31T20:36:57+00:00'
+      last_deployed_at: '2026-04-03T16:17:23+00:00'
       last_status: success
-      last_action: deployed
+      last_action: already_deployed
       last_sync_status: Synced
       last_health_status: Healthy
       previous_successful_version: '23812493467'
