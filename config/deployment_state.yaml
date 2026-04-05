@@ -35,11 +35,11 @@ deployments:
     dev:
       last_version: '23816583483'
       last_requested_version: latest-dev
-      last_gitops_commit: 0744701b8a3bf6dab5ffdec35417d041647b98e6
-      last_ticket: SCRUM-60
+      last_gitops_commit: ddeafb2acc4d658b8aec418a702413f52c6908ad
+      last_ticket: SCRUM-62
       last_argocd_app: dev-order-service
       last_changed_file: applications/order-service/helm/values-dev.yaml
-      last_deployed_at: '2026-04-05T14:18:54+00:00'
+      last_deployed_at: '2026-04-05T15:20:23+00:00'
       last_status: success
       last_action: already_deployed
       last_sync_status: Synced
