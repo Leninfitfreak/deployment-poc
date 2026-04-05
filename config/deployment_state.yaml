@@ -1,19 +1,19 @@
 deployments:
   leninkart/frontend:
     dev:
-      last_version: '23817030783'
-      last_requested_version: latest-dev
-      last_gitops_commit: b7843d7635c4b2864ff28760e0af78785d4b2935
-      last_ticket: SCRUM-43
+      last_version: '24004243798'
+      last_requested_version: '24004243798'
+      last_gitops_commit: ddeafb2acc4d658b8aec418a702413f52c6908ad
+      last_ticket: SCRUM-61
       last_argocd_app: frontend-dev
       last_changed_file: applications/frontend/helm/values-dev.yaml
-      last_deployed_at: '2026-04-03T15:43:02+00:00'
+      last_deployed_at: '2026-04-05T15:17:24+00:00'
       last_status: success
       last_action: deployed
       last_sync_status: Synced
       last_health_status: Healthy
-      previous_successful_version: '23599512080'
-      previous_successful_gitops_commit: b7cfab31eb9fb33ff68d6262bfaa18d1558f19cd
+      previous_successful_version: '23817030783'
+      previous_successful_gitops_commit: b7843d7635c4b2864ff28760e0af78785d4b2935
       rollback_source_version: null
   leninkart/product-service:
     dev:
