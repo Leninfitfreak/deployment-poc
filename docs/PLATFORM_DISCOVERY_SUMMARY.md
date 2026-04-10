@@ -33,28 +33,28 @@ The POC must stay separate from `project-validation`, which remains the document
 ### `leninkart-infra`
 
 - remote: `https://github.com/Leninfitfreak/leninkart-infra.git`
-- active branch: `dev`
+- active branch: `main`
 - actual role: GitOps source of truth for app deployment manifests, platform components, and observability manifests
 - key importance: this is the repo the POC must understand most carefully
 
 ### `leninkart-frontend`
 
 - remote: `https://github.com/Leninfitfreak/leninkart-frontend.git`
-- active branch: `dev`
+- active branch: `main`
 - role: application source repo
 - current deployment behavior: existing GitHub Actions build/push image and update `leninkart-infra`
 
 ### `leninkart-product-service`
 
 - remote: `https://github.com/Leninfitfreak/leninkart-product-service.git`
-- active branch: `dev`
+- active branch: `main`
 - role: application source repo
 - current deployment behavior: existing GitHub Actions build/push image and update `leninkart-infra`
 
 ### `leninkart-order-service`
 
 - remote: `https://github.com/Leninfitfreak/leninkart-order-service.git`
-- active branch: `dev`
+- active branch: `main`
 - role: application source repo
 - current deployment behavior: existing GitHub Actions build/push image and update `leninkart-infra`
 
@@ -101,7 +101,7 @@ Discovery conclusion:
 
 - ArgoCD app name: `leninkart-root`
 - repo URL: `https://github.com/Leninfitfreak/leninkart-infra.git`
-- target revision: `dev`
+- target revision: `main`
 - path: `argocd/applications/dev`
 - sync policy:
   - automated
@@ -323,3 +323,4 @@ Before coding the orchestrator logic, the `deployment-poc` repo should be bootst
 - GitHub Actions `workflow_dispatch` entrypoint
 
 But the design must preserve the discovery conclusions above.
+

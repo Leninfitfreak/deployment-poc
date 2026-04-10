@@ -53,7 +53,7 @@ version: v2
 - Environment: `dev`
 - Namespace: `dev`
 - GitOps repo: `https://github.com/Leninfitfreak/leninkart-infra.git`
-- GitOps branch: `dev`
+- GitOps branch: `main`
 - Values file: `applications/frontend/helm/values-dev.yaml`
 - ArgoCD application: `frontend-dev`
 - Requested version: `v2`
@@ -75,7 +75,7 @@ Result:
   - `Sync = Synced`
   - `Health = Healthy`
   - `Revision = a5530ce5dccff30803b262516d8e66edc0022040`
-- the workflow exited cleanly without creating a new `leninkart-infra/dev` commit
+- the workflow exited cleanly without creating a new `leninkart-infra/main` commit
 
 Tracked workflow-side safety results:
 
@@ -95,7 +95,7 @@ Result:
 
 - rollback mode resolved the last known successful deployment state from `config/deployment_state.yaml`
 - the stored last good version was already live
-- the workflow performed exact ArgoCD verification and exited safely without changing `leninkart-infra/dev`
+- the workflow performed exact ArgoCD verification and exited safely without changing `leninkart-infra/main`
 
 Tracked workflow-side safety results:
 
@@ -138,7 +138,7 @@ Synced Healthy a5530ce5dccff30803b262516d8e66edc0022040 Succeeded
 The GitOps repo head stayed unchanged through both safety validations:
 
 ```text
-leninkart-infra/dev = a5530ce5dccff30803b262516d8e66edc0022040
+leninkart-infra/main = a5530ce5dccff30803b262516d8e66edc0022040
 ```
 
 ## URL Post-Check
@@ -182,7 +182,7 @@ Validated in the working flow:
 7. Final branch-head regression check
    - workflow run `#17` executed from commit `67bd0e9`
    - result stayed `already_deployed`
-   - no new `leninkart-infra/dev` commit was created
+   - no new `leninkart-infra/main` commit was created
 
 ## Reusability Status
 
@@ -193,3 +193,4 @@ The POC remains reusable because:
 - rollback behavior is controlled by `config/deployment_policy.yaml`
 - secrets remain externalized
 - the orchestration logic remains separate from `project-validation`
+

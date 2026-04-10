@@ -28,7 +28,7 @@ LeninKart currently consists of:
   - `deployment-poc`
   - GitHub Actions
   - self-hosted runner `leninkart-runner`
-  - `leninkart-infra` on branch `dev`
+  - `leninkart-infra` on branch `main`
   - ArgoCD in the local `k3d-leninkart-dev` cluster
 - platform support layer
   - `kafka-platform`
@@ -63,7 +63,7 @@ The high-level platform has six real layers:
   - deployment state, locking, stale-lock recovery, rollback scaffolding
   - Jira progress and final feedback
 - GitOps and delivery
-  - `leninkart-infra/dev`
+  - `leninkart-infra/main`
   - ArgoCD apps under `argocd/applications/dev`
   - exact revision validation
 - runtime services
@@ -85,7 +85,7 @@ The high-level platform has six real layers:
 
 The focused deployment path is:
 
-`Jira ticket -> workflow_dispatch -> self-hosted runner -> deployment-poc -> leninkart-infra/dev -> ArgoCD -> Synced + Healthy -> Jira feedback`
+`Jira ticket -> workflow_dispatch -> self-hosted runner -> deployment-poc -> leninkart-infra/main -> ArgoCD -> Synced + Healthy -> Jira feedback`
 
 ## Repositories Involved
 
@@ -136,7 +136,7 @@ Live multi-service validation is documented in [docs/POC_MULTI_SERVICE_VALIDATIO
 5. `deployment-poc` fetches the Jira issue through the Jira API.
 6. The ticket description is parsed into structured deployment metadata.
 7. Validation checks the environment, component, version, and target mapping.
-8. The orchestrator resolves the GitOps target in `leninkart-infra/dev`.
+8. The orchestrator resolves the GitOps target in `leninkart-infra/main`.
 9. The requested version is resolved as `latest`, `latest-dev`, an app alias such as `v1` or `v2`, or an explicit image tag.
 10. A deployment lock is acquired.
 11. The target `values-dev.yaml` file is updated and committed when a new deployment is needed.
@@ -192,7 +192,7 @@ The current dev environment is GitOps-driven through:
 
 - root ArgoCD application: `leninkart-root`
 - GitOps repo: `https://github.com/Leninfitfreak/leninkart-infra.git`
-- target revision: `dev`
+- target revision: `main`
 - application definitions under `leninkart-infra/argocd/applications/dev`
 
 Current active ArgoCD app set includes:
@@ -370,3 +370,4 @@ python -m src.orchestrator --jira-ticket SCRUM-5 --rollback-to-last-success
 - [docs/DEPLOYMENT_STATE_AND_ROLLBACK.md](docs/DEPLOYMENT_STATE_AND_ROLLBACK.md)
 - [docs/STALE_LOCK_RECOVERY.md](docs/STALE_LOCK_RECOVERY.md)
 - [docs/architecture/README_ARCHITECTURE.md](docs/architecture/README_ARCHITECTURE.md)
+

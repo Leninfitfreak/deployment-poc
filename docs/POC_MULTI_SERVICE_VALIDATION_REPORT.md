@@ -10,7 +10,7 @@
 
 All three services were validated through the real chain:
 
-Jira ticket -> GitHub Actions -> self-hosted runner -> `deployment-poc` orchestration -> `leninkart-infra/dev` -> ArgoCD -> `Synced` + `Healthy`
+Jira ticket -> GitHub Actions -> self-hosted runner -> `deployment-poc` orchestration -> `leninkart-infra/main` -> ArgoCD -> `Synced` + `Healthy`
 
 ## Discovery Summary
 
@@ -166,7 +166,7 @@ All three apps are currently `Synced` and `Healthy`.
 Important GitOps nuance:
 
 - exact revision verification was performed successfully at the time of each individual deployment run
-- after later `leninkart-infra/dev` commits for other services, ArgoCD naturally advanced each app's reported branch-head
+- after later `leninkart-infra/main` commits for other services, ArgoCD naturally advanced each app's reported branch-head
   revision to the latest repo commit
 - at the end of this validation window, the current live ArgoCD `status.sync.revision` for all three apps is:
   `4442f25bbd7de543abf59ca9e32c7f358232f938`
@@ -199,3 +199,4 @@ Recommended proof pages:
 - GitHub Actions run summary
 - GitOps commit page in `leninkart-infra`
 - ArgoCD application detail page with final revision
+

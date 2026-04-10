@@ -3,11 +3,12 @@ projects:
     description: LeninKart e-commerce platform
     gitops_repo: https://github.com/Leninfitfreak/leninkart-infra.git
     branch_by_env:
-      dev: dev
+      dev: main
     default_app_by_env:
       dev: frontend
     allowed_apps:
       - frontend
       - product-service
       - order-service
+
 
