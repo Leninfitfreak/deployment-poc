@@ -13,8 +13,8 @@ default_runner_labels:
 terraform_automation:
   repo: Leninfitfreak/Terraform-AWS
   ref: main
-  provision_workflow: aws-staging-provision-dispatch.yml
-  destroy_workflow: aws-staging-destroy-dispatch.yml
+  provision_workflow: aws-staging-provision.yml
+  destroy_workflow: aws-staging-destroy.yml
   timeout_seconds: 3600
   poll_seconds: 20
 jira_feedback:
