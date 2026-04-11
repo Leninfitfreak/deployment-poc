@@ -2,6 +2,7 @@ active_project_key: leninkart
 default_environment: dev
 allowed_environments:
   - dev
+  - staging
 default_runner_labels:
   - self-hosted
   - Windows
@@ -9,6 +10,13 @@ default_runner_labels:
   - leninkart
   - local
   - dev
+terraform_automation:
+  repo: Leninfitfreak/Terraform-AWS
+  ref: main
+  provision_workflow: aws-staging-provision.yml
+  destroy_workflow: aws-staging-destroy.yml
+  timeout_seconds: 3600
+  poll_seconds: 20
 jira_feedback:
   enabled: true
   progress_comments:
@@ -66,3 +74,5 @@ version_resolution:
     by_env:
       dev:
         - latest-dev
+      staging:
+        - latest-staging

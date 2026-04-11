@@ -4,8 +4,10 @@ projects:
     gitops_repo: https://github.com/Leninfitfreak/leninkart-infra.git
     branch_by_env:
       dev: main
+      staging: main
     default_app_by_env:
       dev: frontend
+      staging: frontend
     allowed_apps:
       - frontend
       - product-service

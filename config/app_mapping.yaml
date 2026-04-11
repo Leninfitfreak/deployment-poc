@@ -4,45 +4,66 @@ apps:
     aliases: [frontend, leninkart-frontend, web]
     values_path_by_env:
       dev: applications/frontend/helm/values-dev.yaml
+      staging: applications/frontend/helm/values-staging.yaml
     version_aliases_by_env:
       dev:
         v1: "23599212196"
         v2: "23599512080"
+      staging:
+        v1: "23599212196"
+        v2: "23599512080"
     argocd_app_by_env:
       dev: frontend-dev
+      staging: frontend-staging
     namespace_by_env:
       dev: dev
+      staging: staging
     ingress_url_by_env:
       dev: http://dev.leninkart.local
+      staging: http://staging.leninkart.local
 
   product-service:
     project: leninkart
     aliases: [product-service, product, products]
     values_path_by_env:
       dev: applications/product-service/helm/values-dev.yaml
+      staging: applications/product-service/helm/values-staging.yaml
     version_aliases_by_env:
       dev:
         v1: "23599211809"
         v2: "23599512382"
+      staging:
+        v1: "23599211809"
+        v2: "23599512382"
     argocd_app_by_env:
       dev: dev-product-service
+      staging: product-service-staging
     namespace_by_env:
       dev: dev
+      staging: staging
     ingress_url_by_env:
       dev: http://dev.leninkart.local/api/products
+      staging: http://staging.leninkart.local/api/products
 
   order-service:
     project: leninkart
     aliases: [order-service, order, orders]
     values_path_by_env:
       dev: applications/order-service/helm/values-dev.yaml
+      staging: applications/order-service/helm/values-staging.yaml
     version_aliases_by_env:
       dev:
         v1: "23599211965"
         v2: "23599512459"
+      staging:
+        v1: "23599211965"
+        v2: "23599512459"
     argocd_app_by_env:
       dev: dev-order-service
+      staging: order-service-staging
     namespace_by_env:
       dev: dev
+      staging: staging
     ingress_url_by_env:
       dev: http://dev.leninkart.local/api/orders
+      staging: http://staging.leninkart.local/api/orders
