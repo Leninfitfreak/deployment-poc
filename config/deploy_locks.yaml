@@ -30,11 +30,15 @@ locks:
       repository: Leninfitfreak/deployment-poc
       workflow_name: Deploy From Jira
       acquired_at: '2026-04-11T10:06:16+00:00'
-      last_updated_at: '2026-04-11T10:26:06+00:00'
-      status: released
-      released_at: '2026-04-11T10:26:06+00:00'
-      note: 'failure: Deployment lock active for leninkart/frontend in staging (ticket=SCRUM-70,
-        run=24280193371)'
+      last_updated_at: '2026-04-11T10:30:13+00:00'
+      status: force_released
+      released_at: '2026-04-11T10:30:13+00:00'
+      note: clear stale SCRUM-70 lock (run 24280193371)
+      force_release_reason: Deployment lock is non-blocking with status 'released'
+      force_release_actor: Leninfitfreak
+      force_release_runner: leninkar-runner
+      force_release_repository: Leninfitfreak/deployment-poc
+      force_release_ticket: SCRUM-70
   leninkart/product-service:
     dev:
       app_key: product-service
