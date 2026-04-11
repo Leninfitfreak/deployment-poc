@@ -90,7 +90,6 @@ jobs:
           RUNNER_NAME: ${{ runner.name }}
           TEST_MODE: ${{ inputs.test_mode }}
         run: |
-          call scripts\start-argocd-port-forward.cmd
           python -m src.orchestrator --jira-ticket "${{ inputs.jira_ticket }}" --argocd-timeout-seconds "${{ inputs.argocd_timeout_seconds }}" ${{ inputs.trigger_argocd_sync && '--trigger-argocd-sync' || '' }} ${{ inputs.test_mode && '--test-mode' || '' }} ${{ inputs.rollback_to_last_success && '--rollback-to-last-success' || '' }}
 
       - name: Print resolved deployment result
@@ -110,3 +109,4 @@ jobs:
         with:
           name: deployment-result
           path: artifacts/
+

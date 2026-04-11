@@ -46,6 +46,58 @@ def ensure_postchecks_success(postchecks: dict) -> None:
         raise PocError(detail)
 
 
+
+def normalize_action(value: str) -> str:
+    action = (value or "").strip().lower()
+    return action or "deploy"
+
+
+def ensure_argocd_port_forward(root: Path) -> None:
+    run(["cmd", "/c", "call", "scripts\\start-argocd-port-forward.cmd"], cwd=root)
+
+
+
+def refresh_kubeconfig(target: dict, environments: dict) -> None:
+    env = (target.get("environment") or "").strip()
+    env_cfg = (environments.get("environments", {}) or {}).get(env, {})
+    cluster_name = str(env_cfg.get("cluster_context", "") or "").strip()
+    if not cluster_name:
+        raise PocError(f"Missing cluster_context for environment '{env}' in environments.yaml")
+    region = str(env_cfg.get("aws_region", "") or os.environ.get("AWS_REGION", "us-east-1")).strip()
+    kubeconfig = os.environ.get("KUBECONFIG", "")
+    cmd = ["aws", "eks", "update-kubeconfig", "--region", region, "--name", cluster_name]
+    if kubeconfig:
+        cmd.extend(["--kubeconfig", kubeconfig])
+    run(cmd)
+
+def run_terraform_provision(
+    *,
+    automation: dict,
+    github_client: GithubActionsClient,
+    target: dict,
+) -> dict:
+    repo = str(automation.get("repo", "") or "").strip()
+    workflow = str(automation.get("provision_workflow", "") or "").strip()
+    ref = str(automation.get("ref", "") or "main").strip() or "main"
+    timeout_seconds = int(automation.get("timeout_seconds", 3600))
+    poll_seconds = int(automation.get("poll_seconds", 20))
+    if not repo or not workflow:
+        raise PocError("Terraform automation repo/workflow is not configured in global.yaml")
+    dispatch_time = github_client.dispatch_workflow(
+        repo,
+        workflow,
+        ref,
+        {
+            "environment": target.get("environment", ""),
+            "component": target.get("app_key", ""),
+            "action": "provision_and_deploy",
+        },
+    )
+    run_state = github_client.wait_for_workflow_completion(repo, workflow, dispatch_time, timeout_seconds, poll_seconds)
+    if run_state.get("conclusion") and run_state.get("conclusion") != "success":
+        raise PocError(f"Terraform workflow failed: {run_state.get('html_url', '')}")
+    return run_state
+
 def attempt_automatic_rollback(
     *,
     policy: dict,
@@ -233,6 +285,9 @@ def main() -> int:
         requested_version = target["requested_version"]
         repository = os.environ.get("GITHUB_REPOSITORY", github_client.repository if github_client else "")
 
+        requested_action = normalize_action(metadata.get("action", ""))
+        terraform_result = {}
+
         if args.rollback_to_last_success:
             rollback_version = previous_state.get("last_version", "").strip()
             if not rollback_version:
@@ -283,7 +338,25 @@ def main() -> int:
                     })
             current_tag = gitops.get_current_image_tag(target["values_path"])
             current_revision = gitops.get_current_revision()
-            prechecks = run_prechecks(target, gitops.repo_dir, argocd)
+            if requested_action == "provision_and_deploy":
+                prechecks = run_prechecks(target, gitops.repo_dir, None)
+                automation_cfg = configs["global"].get("terraform_automation", {}) or {}
+                terraform_client = GithubActionsClient(
+                    root,
+                    repository=str(automation_cfg.get("repo", "") or "").strip(),
+                    api_token=os.environ.get("PAT_TOKEN", "") or os.environ.get("GITHUB_API_TOKEN", ""),
+                )
+                terraform_result = run_terraform_provision(
+                    automation=automation_cfg,
+                    github_client=terraform_client,
+                    target=target,
+                )
+                refresh_kubeconfig(target, configs["environments"])
+                ensure_argocd_port_forward(root)
+                prechecks = run_prechecks(target, gitops.repo_dir, argocd)
+            else:
+                ensure_argocd_port_forward(root)
+                prechecks = run_prechecks(target, gitops.repo_dir, argocd)
             rollback_source_version = current_tag
 
             already_successful_same_ticket = (
@@ -535,3 +608,8 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
+
+
+

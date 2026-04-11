@@ -10,9 +10,9 @@ environments:
   staging:
     namespace: staging
     cluster_context: leninkart-staging-eks
+    aws_region: us-east-1
     argocd_root_app: leninkart-root
     requires_argocd_verification: true
     notes: >
       AWS staging environment (EKS). GitOps sync happens against main and targets staging namespaces.
       ArgoCD reconciliation is treated as the primary health signal for this environment.
-
