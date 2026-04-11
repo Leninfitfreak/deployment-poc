@@ -30,8 +30,11 @@ locks:
       repository: Leninfitfreak/deployment-poc
       workflow_name: Deploy From Jira
       acquired_at: '2026-04-11T14:44:14+00:00'
-      last_updated_at: '2026-04-11T14:44:14+00:00'
-      status: in_progress
+      last_updated_at: '2026-04-11T14:44:21+00:00'
+      status: released
+      released_at: '2026-04-11T14:44:21+00:00'
+      note: 'failure: Workflow dispatch failed: status=422 body={"message":"Workflow
+        does not have ''workflow_dispatch'' trigger","documentation_url":"https://docs.github.com/rest/actions/workflows#create-a-workflow-dispatch-event","status":"422"}'
   leninkart/product-service:
     dev:
       app_key: product-service
