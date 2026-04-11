@@ -21,19 +21,17 @@ locks:
       app_key: frontend
       environment: staging
       ticket: SCRUM-70
-      run_id: '24280821665'
-      run_url: https://github.com/Leninfitfreak/deployment-poc/actions/runs/24280821665
+      run_id: '24280883913'
+      run_url: https://github.com/Leninfitfreak/deployment-poc/actions/runs/24280883913
       requested_version: latest-staging
       resolved_version: '24004243798'
       actor: Leninfitfreak
       runner_name: leninkar-runner
       repository: Leninfitfreak/deployment-poc
       workflow_name: Deploy From Jira
-      acquired_at: '2026-04-11T10:45:38+00:00'
-      last_updated_at: '2026-04-11T10:46:28+00:00'
-      status: released
-      released_at: '2026-04-11T10:46:28+00:00'
-      note: 'failure: Terraform workflow failed: https://github.com/Leninfitfreak/Terraform-AWS/actions/runs/24280829087'
+      acquired_at: '2026-04-11T10:49:48+00:00'
+      last_updated_at: '2026-04-11T10:49:48+00:00'
+      status: in_progress
   leninkart/product-service:
     dev:
       app_key: product-service
