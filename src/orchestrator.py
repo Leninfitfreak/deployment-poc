@@ -310,7 +310,7 @@ def main() -> int:
         )
         jira_progress_reporter.publish_stage("lock_acquired", {"target": target, "requested_version": requested_version, "resolved_version": desired_version, "detail": "Deployment lock acquired successfully."})
 
-        with GitOpsRepoManager(target["gitops_repo"], target["gitops_branch"], os.environ.get("PAT_TOKEN", "")) as gitops:
+        with GitOpsRepoManager(target["gitops_repo"], target["gitops_branch"], os.environ.get("TERRAFORM_TOKEN", "")) as gitops:
             def publish_argocd_sync_in_progress(status: dict) -> None:
                 if jira_progress_reporter:
                     jira_progress_reporter.publish_stage("argocd_sync_in_progress", {
@@ -344,7 +344,7 @@ def main() -> int:
                 terraform_client = GithubActionsClient(
                     root,
                     repository=str(automation_cfg.get("repo", "") or "").strip(),
-                    api_token=os.environ.get("PAT_TOKEN", "") or os.environ.get("GITHUB_API_TOKEN", ""),
+                    api_token=os.environ.get("TERRAFORM_TOKEN", "") or os.environ.get("GITHUB_API_TOKEN", ""),
                 )
                 terraform_result = run_terraform_provision(
                     automation=automation_cfg,
@@ -608,6 +608,7 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
 
 
 
